@@ -9,8 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Download, ShieldCheck, Users, Loader2, ChevronDown, Check, Globe } from "lucide-react";
+import { LogOut, Download, ShieldCheck, Users, Loader2, ChevronDown, Check, Globe, UserPlus, Trash2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import polygonLogo from "@/assets/polygon-logo.svg";
 import DiscReportTemplate from "@/components/DiscReportTemplate";
@@ -43,6 +44,8 @@ const LeaderDashboard = () => {
     primaryStyle: string;
     scores: { D: number; I: number; S: number; C: number };
   } | null>(null);
+  const [preApproveNames, setPreApproveNames] = useState("");
+  const [preApproveLoading, setPreApproveLoading] = useState(false);
 
   useEffect(() => {
     if (!user) { navigate("/"); return; }
@@ -127,6 +130,52 @@ const LeaderDashboard = () => {
       setUser({ ...user!, role: newRole, status: user!.status ?? "approved" });
       if (newRole === "employee") navigate("/disc-test");
     }
+    fetchTeam();
+  };
+
+  const handlePreApprove = async () => {
+    const names = preApproveNames.split("\n").map((n) => n.trim()).filter(Boolean);
+    if (names.length === 0) return;
+    setPreApproveLoading(true);
+    let added = 0;
+
+    for (const name of names) {
+      const { data: existing } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("full_name", name)
+        .maybeSingle();
+
+      if (existing) {
+        toast({ description: t.leader.preApproveExists.replace("{name}", name) });
+        continue;
+      }
+
+      const { data: newProfile } = await supabase
+        .from("profiles")
+        .insert({ full_name: name, status: "approved" } as any)
+        .select("id")
+        .single();
+
+      if (newProfile) {
+        await supabase.from("user_roles").insert({ user_id: newProfile.id, role: "employee" });
+        added++;
+      }
+    }
+
+    if (added > 0) {
+      toast({ title: t.leader.preApproveAdded.replace("{count}", String(added)) });
+    }
+    setPreApproveNames("");
+    setPreApproveLoading(false);
+    fetchTeam();
+  };
+
+  const handleDeleteMember = async (member: TeamMember) => {
+    if (!confirm(t.leader.deleteConfirm.replace("{name}", member.full_name))) return;
+    await supabase.from("user_roles").delete().eq("user_id", member.id);
+    await supabase.from("profiles").delete().eq("id", member.id);
+    toast({ title: t.leader.deleted.replace("{name}", member.full_name) });
     fetchTeam();
   };
 
@@ -269,6 +318,33 @@ const LeaderDashboard = () => {
           </Card>
         )}
 
+        <Card className="border-0 shadow-lg rounded-xl border-l-4 border-l-blue-400">
+          <CardHeader className="flex flex-row items-center gap-3 pb-2">
+            <UserPlus className="h-5 w-5 text-blue-500" />
+            <CardTitle className="text-lg">{t.leader.preApprove}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">{t.leader.preApproveDesc}</p>
+            <Textarea
+              value={preApproveNames}
+              onChange={(e) => setPreApproveNames(e.target.value)}
+              placeholder="Anders Jensen&#10;Maria Nielsen&#10;..."
+              rows={4}
+            />
+            <Button
+              onClick={handlePreApprove}
+              disabled={preApproveLoading || !preApproveNames.trim()}
+              className="rounded-xl"
+            >
+              {preApproveLoading ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t.leader.preApproveAdd}</>
+              ) : (
+                <><UserPlus className="mr-2 h-4 w-4" /> {t.leader.preApproveAdd}</>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+
         <Card className="border-0 shadow-lg rounded-xl">
           <CardHeader className="flex flex-row items-center gap-3 pb-2">
             <Users className="h-5 w-5 text-primary" />
@@ -331,7 +407,11 @@ const LeaderDashboard = () => {
                               {t.leader.statusCurrent}
                             </Badge>
                           )
-                        ) : null}
+                        ) : (
+                          <Badge variant="outline" className="border-blue-400 bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400">
+                            {t.leader.statusPreApproved}
+                          </Badge>
+                        )}
                       </TableCell>
                       <TableCell className="text-right space-x-2">
                         <Button variant="outline" size="sm" className="rounded-xl" onClick={() => toggleRole(member)}>
@@ -349,6 +429,15 @@ const LeaderDashboard = () => {
                             ) : (
                               <><Download className="mr-1 h-3 w-3" /> <span className="hidden sm:inline">{t.leader.fullReport}</span></>
                             )}
+                          </Button>
+                        )}
+                        {!member.primary_style && (
+                          <Button
+                            variant="outline" size="sm" className="rounded-xl text-destructive hover:text-destructive"
+                            onClick={() => handleDeleteMember(member)}
+                          >
+                            <Trash2 className="mr-1 h-3 w-3" />
+                            <span className="hidden sm:inline">{t.approval.reject}</span>
                           </Button>
                         )}
                       </TableCell>
