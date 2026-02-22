@@ -31,6 +31,8 @@ export const en: typeof da = {
     startTest: "Start DISC Profile",
     profileCompleted: "Profile completed",
     keyTraits: "Your key traits",
+    refreshBanner: "Time for a refresh?",
+    refreshDescription: "Your DISC profile is over 6 months old. Consider retaking the test to ensure your profile still reflects you.",
   },
   leader: {
     responseRate: "Response rate",
@@ -48,6 +50,9 @@ export const en: typeof da = {
     roleUpdated: "Role updated",
     roleUpdatedDesc: "{name} is now {role}.",
     pdfError: "Could not generate PDF report.",
+    status: "Status",
+    statusCurrent: "Up to date",
+    statusStale: "Needs follow-up",
   },
   report: {
     title: "DISC Profile Report",

@@ -4,12 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation, languages } from "@/lib/i18n";
 import { calculatePrimaryStyle } from "@/lib/disc-data";
+import { differenceInMonths } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, CheckCircle2, ArrowRight, ArrowLeft, ChevronDown, Check, Globe } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { LogOut, CheckCircle2, ArrowRight, ArrowLeft, ChevronDown, Check, Globe, AlertTriangle } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import polygonLogo from "@/assets/polygon-logo.svg";
 
@@ -19,20 +21,26 @@ const EmployeeDashboard = () => {
   const location = useLocation();
   const { t, lang, setLang } = useTranslation();
   const [discResult, setDiscResult] = useState<string | null>(null);
+  const [completedAt, setCompletedAt] = useState<string | null>(null);
   const [testStarted, setTestStarted] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const isStale = completedAt ? differenceInMonths(new Date(), new Date(completedAt)) >= 6 : false;
+
   useEffect(() => {
     if (!user) { navigate("/"); return; }
     supabase
       .from("disc_results")
-      .select("primary_style")
+      .select("primary_style, completed_at")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
-        if (data) setDiscResult(data.primary_style);
+        if (data) {
+          setDiscResult(data.primary_style);
+          setCompletedAt(data.completed_at);
+        }
         setLoading(false);
       });
   }, [user, navigate]);
@@ -184,7 +192,14 @@ const EmployeeDashboard = () => {
             <LogOut className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">{t.common.logout}</span>
           </Button>
         </Header>
-        <main className="max-w-2xl mx-auto p-4 sm:p-6 mt-4 sm:mt-8">
+        <main className="max-w-2xl mx-auto p-4 sm:p-6 mt-4 sm:mt-8 space-y-4">
+          {isStale && (
+            <Alert className="border-amber-300 bg-amber-50 dark:bg-amber-950/30">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertTitle className="text-amber-800 dark:text-amber-300">{t.test.refreshBanner}</AlertTitle>
+              <AlertDescription className="text-amber-700 dark:text-amber-400">{t.test.refreshDescription}</AlertDescription>
+            </Alert>
+          )}
           <Card className="border-0 shadow-lg rounded-xl">
             <CardHeader className="text-center space-y-4">
               <div className="mx-auto w-20 h-20 rounded-full bg-primary flex items-center justify-center">

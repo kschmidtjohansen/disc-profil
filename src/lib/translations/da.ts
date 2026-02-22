@@ -29,6 +29,8 @@ export const da = {
     startTest: "Start DISC Profil",
     profileCompleted: "Profil gennemført",
     keyTraits: "Dine nøgleegenskaber",
+    refreshBanner: "Tid til en opdatering?",
+    refreshDescription: "Din DISC-profil er over 6 måneder gammel. Overvej at tage testen igen for at sikre, at din profil stadig afspejler dig.",
   },
   leader: {
     responseRate: "Svarprocent",
@@ -46,6 +48,9 @@ export const da = {
     roleUpdated: "Rolle opdateret",
     roleUpdatedDesc: "{name} er nu {role}.",
     pdfError: "Kunne ikke generere PDF-rapport.",
+    status: "Status",
+    statusCurrent: "Opdateret",
+    statusStale: "Trænger til opfølgning",
   },
   report: {
     title: "DISC Profilrapport",
