@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation, languages } from "@/lib/i18n";
@@ -22,6 +23,7 @@ const EmployeeDashboard = () => {
   const { t, lang, setLang } = useTranslation();
   const [discResult, setDiscResult] = useState<string | null>(null);
   const [completedAt, setCompletedAt] = useState<string | null>(null);
+  const [savedAnswers, setSavedAnswers] = useState<string[]>([]);
   const [testStarted, setTestStarted] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
@@ -34,13 +36,16 @@ const EmployeeDashboard = () => {
     if (user.status === "pending_approval") { navigate("/pending"); return; }
     supabase
       .from("disc_results")
-      .select("primary_style, completed_at")
+      .select("primary_style, completed_at, answers")
       .eq("user_id", user.id)
       .maybeSingle()
       .then(({ data }) => {
         if (data) {
           setDiscResult(data.primary_style);
           setCompletedAt(data.completed_at);
+          if (Array.isArray(data.answers)) {
+            setSavedAnswers(data.answers.filter((a): a is string => typeof a === "string"));
+          }
         }
         setLoading(false);
       });
@@ -62,6 +67,7 @@ const EmployeeDashboard = () => {
       completed_at: new Date().toISOString(),
     }, { onConflict: "user_id" });
     setDiscResult(primaryStyle);
+    setSavedAnswers(answers);
     setTestStarted(false);
   };
 
@@ -218,6 +224,29 @@ const EmployeeDashboard = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <p className="text-muted-foreground leading-relaxed">{desc?.description}</p>
+              {savedAnswers.length > 0 && (() => {
+                const scores = { D: 0, I: 0, S: 0, C: 0 };
+                savedAnswers.forEach((a) => { if (a in scores) scores[a as keyof typeof scores]++; });
+                const DISC_COLORS: Record<string, string> = { D: "#e74c3c", I: "#f1c40f", S: "#2ecc71", C: "#00aeef" };
+                const radarData = [
+                  { trait: "Dominans", score: scores.D },
+                  { trait: "Indflydelse", score: scores.I },
+                  { trait: "Stabilitet", score: scores.S },
+                  { trait: "Conscientiøs", score: scores.C },
+                ];
+                return (
+                  <div className="w-full h-64 sm:h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
+                        <PolarGrid stroke="hsl(var(--border))" />
+                        <PolarAngleAxis dataKey="trait" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} />
+                        <PolarRadiusAxis domain={[0, Math.max(...Object.values(scores), 5)]} tick={{ fontSize: 10 }} />
+                        <Radar name="DiSC" dataKey="score" stroke={DISC_COLORS[style]} fill={DISC_COLORS[style]} fillOpacity={0.3} strokeWidth={2} />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
+                );
+              })()}
               <div>
                 <h3 className="font-semibold mb-3 text-sm uppercase tracking-wider text-muted-foreground">{t.test.keyTraits}</h3>
                 <div className="flex flex-wrap gap-2">

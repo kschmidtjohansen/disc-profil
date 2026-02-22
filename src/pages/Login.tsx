@@ -28,7 +28,7 @@ const Login = () => {
       const { data: existing } = await supabase
         .from("profiles")
         .select("id, full_name")
-        .eq("full_name", trimmed)
+        .ilike("full_name", trimmed)
         .maybeSingle();
 
       let profileId: string;
@@ -107,11 +107,11 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-primary p-4 relative">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4 relative">
       <div className="absolute top-4 right-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-1.5 text-primary-foreground/80 hover:text-primary-foreground transition-colors text-sm">
+            <button className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-sm">
               <Globe className="h-4 w-4" />
               {languages.find((l) => l.code === lang)?.label}
             </button>
