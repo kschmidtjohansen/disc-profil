@@ -152,7 +152,7 @@ const LeaderDashboard = () => {
   const NavDropdown = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-1 text-xl font-semibold text-primary-foreground hover:opacity-80 transition-opacity">
+        <button className="flex items-center gap-1 text-base sm:text-xl font-semibold text-primary-foreground hover:opacity-80 transition-opacity">
           {t.common.discProfile}
           <ChevronDown className="h-4 w-4" />
         </button>
@@ -175,7 +175,7 @@ const LeaderDashboard = () => {
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-1.5 text-primary-foreground/80 hover:text-primary-foreground transition-colors text-sm">
           <Globe className="h-4 w-4" />
-          {languages.find((l) => l.code === lang)?.label}
+          <span className="hidden sm:inline">{languages.find((l) => l.code === lang)?.label}</span>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-popover">
@@ -191,21 +191,26 @@ const LeaderDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <img src={polygonLogo} alt="Polygon" className="h-8 brightness-0 invert" />
+      <header className="bg-primary text-primary-foreground px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap justify-between items-center gap-2">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <img
+            src={polygonLogo}
+            alt="Polygon"
+            className="h-7 sm:h-8 brightness-0 invert cursor-pointer"
+            onClick={() => navigate("/disc-test")}
+          />
           <NavDropdown />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <LanguageDropdown />
-          <span className="text-sm opacity-80">{user?.full_name}</span>
-          <Button variant="ghost" onClick={handleLogout} className="text-primary-foreground hover:text-primary-foreground/80 hover:bg-primary/80">
-            <LogOut className="mr-2 h-4 w-4" /> {t.common.logout}
+          <span className="text-sm opacity-80 hidden sm:inline">{user?.full_name}</span>
+          <Button variant="ghost" onClick={handleLogout} className="text-primary-foreground hover:text-primary-foreground/80 hover:bg-primary/80 text-sm">
+            <LogOut className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">{t.common.logout}</span>
           </Button>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto p-6 space-y-8 mt-4">
+      <main className="max-w-5xl mx-auto p-4 sm:p-6 space-y-8 mt-4">
         <Card className="border-0 shadow-lg rounded-xl">
           <CardHeader className="flex flex-row items-center gap-3 pb-2">
             <Users className="h-5 w-5 text-primary" />
@@ -224,7 +229,7 @@ const LeaderDashboard = () => {
           <CardHeader>
             <CardTitle className="text-lg">{t.leader.teamOverview}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -258,7 +263,7 @@ const LeaderDashboard = () => {
                       <TableCell className="text-right space-x-2">
                         <Button variant="outline" size="sm" className="rounded-xl" onClick={() => toggleRole(member)}>
                           <ShieldCheck className="mr-1 h-3 w-3" />
-                          {member.role === "leader" ? t.leader.makeEmployee : t.leader.makeLeader}
+                          <span className="hidden sm:inline">{member.role === "leader" ? t.leader.makeEmployee : t.leader.makeLeader}</span>
                         </Button>
                         {member.primary_style && member.answers && (
                           <Button
@@ -267,9 +272,9 @@ const LeaderDashboard = () => {
                             disabled={generatingId === member.id}
                           >
                             {generatingId === member.id ? (
-                              <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> {t.leader.generating}</>
+                              <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> <span className="hidden sm:inline">{t.leader.generating}</span></>
                             ) : (
-                              <><Download className="mr-1 h-3 w-3" /> {t.leader.fullReport}</>
+                              <><Download className="mr-1 h-3 w-3" /> <span className="hidden sm:inline">{t.leader.fullReport}</span></>
                             )}
                           </Button>
                         )}

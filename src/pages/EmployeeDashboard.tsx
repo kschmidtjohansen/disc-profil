@@ -60,7 +60,7 @@ const EmployeeDashboard = () => {
   const NavDropdown = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-1 text-xl font-semibold text-primary-foreground hover:opacity-80 transition-opacity">
+        <button className="flex items-center gap-1 text-base sm:text-xl font-semibold text-primary-foreground hover:opacity-80 transition-opacity">
           {t.common.discProfile}
           <ChevronDown className="h-4 w-4" />
         </button>
@@ -85,7 +85,7 @@ const EmployeeDashboard = () => {
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-1.5 text-primary-foreground/80 hover:text-primary-foreground transition-colors text-sm">
           <Globe className="h-4 w-4" />
-          {languages.find((l) => l.code === lang)?.label}
+          <span className="hidden sm:inline">{languages.find((l) => l.code === lang)?.label}</span>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-popover">
@@ -99,6 +99,24 @@ const EmployeeDashboard = () => {
     </DropdownMenu>
   );
 
+  const Header = ({ children }: { children?: React.ReactNode }) => (
+    <header className="bg-primary text-primary-foreground px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap justify-between items-center gap-2">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <img
+          src={polygonLogo}
+          alt="Polygon"
+          className="h-7 sm:h-8 brightness-0 invert cursor-pointer"
+          onClick={() => navigate("/disc-test")}
+        />
+        <NavDropdown />
+      </div>
+      <div className="flex items-center gap-2 sm:gap-4">
+        <LanguageDropdown />
+        {children}
+      </div>
+    </header>
+  );
+
   if (loading) return <div className="flex min-h-screen items-center justify-center"><p>{t.common.loading}</p></div>;
 
   const questions = t.disc.questions;
@@ -108,22 +126,15 @@ const EmployeeDashboard = () => {
     const q = questions[currentQuestion];
     return (
       <div className="min-h-screen bg-background">
-        <header className="bg-primary text-primary-foreground px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <img src={polygonLogo} alt="Polygon" className="h-8 brightness-0 invert" />
-            <NavDropdown />
-          </div>
-          <div className="flex items-center gap-4">
-            <LanguageDropdown />
-            <span className="text-sm opacity-80">
-              {t.test.questionOf.replace("{current}", String(currentQuestion + 1)).replace("{total}", String(questions.length))}
-            </span>
-          </div>
-        </header>
-        <main className="max-w-2xl mx-auto p-6 mt-8">
+        <Header>
+          <span className="text-xs sm:text-sm opacity-80">
+            {t.test.questionOf.replace("{current}", String(currentQuestion + 1)).replace("{total}", String(questions.length))}
+          </span>
+        </Header>
+        <main className="max-w-2xl mx-auto p-4 sm:p-6 mt-4 sm:mt-8">
           <Card className="rounded-xl shadow-lg">
             <CardHeader>
-              <CardTitle className="text-xl">{q.question}</CardTitle>
+              <CardTitle className="text-lg sm:text-xl">{q.question}</CardTitle>
               <CardDescription>{t.test.chooseAnswer}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -131,7 +142,7 @@ const EmployeeDashboard = () => {
                 {q.options.map((opt) => (
                   <div key={opt.style} className="flex items-center space-x-3 p-3 rounded-xl border hover:bg-muted transition-colors cursor-pointer">
                     <RadioGroupItem value={opt.style} id={`q${q.id}-${opt.style}`} />
-                    <Label htmlFor={`q${q.id}-${opt.style}`} className="cursor-pointer flex-1 text-base">{opt.label}</Label>
+                    <Label htmlFor={`q${q.id}-${opt.style}`} className="cursor-pointer flex-1 text-sm sm:text-base">{opt.label}</Label>
                   </div>
                 ))}
               </RadioGroup>
@@ -162,19 +173,12 @@ const EmployeeDashboard = () => {
     const desc = t.disc.descriptions[style as keyof typeof t.disc.descriptions];
     return (
       <div className="min-h-screen bg-background">
-        <header className="bg-primary text-primary-foreground px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <img src={polygonLogo} alt="Polygon" className="h-8 brightness-0 invert" />
-            <NavDropdown />
-          </div>
-          <div className="flex items-center gap-4">
-            <LanguageDropdown />
-            <Button variant="ghost" onClick={handleLogout} className="text-primary-foreground hover:text-primary-foreground/80 hover:bg-primary/80">
-              <LogOut className="mr-2 h-4 w-4" /> {t.common.logout}
-            </Button>
-          </div>
-        </header>
-        <main className="max-w-2xl mx-auto p-6 mt-8">
+        <Header>
+          <Button variant="ghost" onClick={handleLogout} className="text-primary-foreground hover:text-primary-foreground/80 hover:bg-primary/80 text-sm">
+            <LogOut className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">{t.common.logout}</span>
+          </Button>
+        </Header>
+        <main className="max-w-2xl mx-auto p-4 sm:p-6 mt-4 sm:mt-8">
           <Card className="border-0 shadow-lg rounded-xl">
             <CardHeader className="text-center space-y-4">
               <div className="mx-auto w-20 h-20 rounded-full bg-primary flex items-center justify-center">
@@ -205,22 +209,15 @@ const EmployeeDashboard = () => {
   // Welcome view
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <img src={polygonLogo} alt="Polygon" className="h-8 brightness-0 invert" />
-          <NavDropdown />
-        </div>
-        <div className="flex items-center gap-4">
-          <LanguageDropdown />
-          <Button variant="ghost" onClick={handleLogout} className="text-primary-foreground hover:text-primary-foreground/80 hover:bg-primary/80">
-            <LogOut className="mr-2 h-4 w-4" /> {t.common.logout}
-          </Button>
-        </div>
-      </header>
-      <main className="max-w-2xl mx-auto p-6 mt-16">
+      <Header>
+        <Button variant="ghost" onClick={handleLogout} className="text-primary-foreground hover:text-primary-foreground/80 hover:bg-primary/80 text-sm">
+          <LogOut className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">{t.common.logout}</span>
+        </Button>
+      </Header>
+      <main className="max-w-2xl mx-auto p-4 sm:p-6 mt-8 sm:mt-16">
         <Card className="text-center border-0 shadow-lg rounded-xl">
           <CardHeader className="space-y-4 pb-2">
-            <CardTitle className="text-3xl">{t.test.welcome.replace("{name}", user?.full_name ?? "")}</CardTitle>
+            <CardTitle className="text-2xl sm:text-3xl">{t.test.welcome.replace("{name}", user?.full_name ?? "")}</CardTitle>
             <CardDescription className="text-base">{t.test.welcomeDescription}</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
