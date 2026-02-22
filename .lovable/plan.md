@@ -1,64 +1,78 @@
 
 
-# Opdatering af Design, Branding og PDF-beskrivelser
+# Professionel DiSC-rapport med PDF-download
 
 ## Overblik
-Appen opdateres til at matche Polygon-branding fra pdk12-ugeplan projektet, og PDF-rapporten udvides med detaljerede profilbeskrivelser.
+Den nuvaerende "Rapport"-knap genererer en simpel HTML-fil. Den erstattes med en professionel, flersiders PDF-rapport genereret direkte i browseren ved hjaelp af **jspdf** og **html2canvas**. Rapporten inkluderer et visuelt soejlediagram (recharts), detaljerede profilbeskrivelser og en lederguide.
 
 ---
 
-## 1. Logo
-- Polygon-logoet hentes fra `https://www.polygongroup.com/UI/build/svg/polygon-logo.svg`
-- Logoet tilfojes i navigationsbjælken pa alle sider (Login, Employee, Leader)
-- Pa login-siden erstatter logoet det nuvarende "D"-ikon
+## Hvad rapporten indeholder
 
-## 2. Farver (fra pdk12 CSS-variabler)
-Alle CSS-variabler i `src/index.css` opdateres til Polygon-farverne:
+### Side 1 -- Forside og oversigt
+- **Header**: Polygon-logo, medarbejderens navn og dato
+- **Visuelt diagram**: 4 soejler (BarChart fra recharts) der viser point-fordelingen pa tvaers af D, I, S og C -- beregnet ud fra medarbejderens svar (gemt i `disc_results.answers`)
+- **"Din Primaere Profil"**: Profilnavn (f.eks. "Dominans (D)") med den generelle beskrivelse
 
-| Variabel | Nuvarende | Ny vardi |
-|----------|-----------|----------|
-| --primary | 215 70% 22% (morkebla) | 197 100% 47% (Polygon-bla #00aeef) |
-| --primary-foreground | 210 40% 98% | 0 0% 98% |
-| --background | 210 30% 98% | 0 0% 100% (ren hvid) |
-| --foreground | 215 50% 12% | 215 25% 27% |
-| --border | 214 25% 88% | 220 13% 91% |
-| --ring | 215 70% 22% | 197 100% 47% |
-| --radius | 0.5rem | 0.75rem |
-| --accent | 210 60% 40% | 210 40% 96% |
-| (+ tilsvarende for card, muted, secondary, sidebar osv.) |
+### Side 2 -- Adfaerdsindsigter
+- **Motivation**: Hvad driver denne person? (baseret pa svar fra sporgsmal 4)
+- **Under pres**: Hvordan reagerer de pa stress? (baseret pa sporgsmal 3)
+- **Kommunikation**: Bedste made at tale med dem pa (baseret pa sporgsmal 2)
+- **Styrker** og **Udviklingsomrade**: Fra de eksisterende `discDescriptions`
 
-## 3. Typografi
-- Fjern Playfair Display og brug kun **Inter** som i pdk12-projektet
-- Tilfoej `font-sans` og `antialiased` til body
-- Overskrifter (h1-h3) bruger Inter med `font-semibold tracking-tight` i stedet for serif
-
-## 4. Komponent-stil
-- Border-radius opdateres til 0.75rem (fra 0.5rem)
-- Knapper far rundede hjorner med `rounded-xl`
-- Cards far `shadow-lg rounded-xl` og en lettere kant
-- Input-felter far `rounded-xl border-2` stil
-
-## 5. Udvidede PDF-beskrivelser
-`discDescriptions` i `src/lib/disc-data.ts` udvides med nye felter til den detaljerede rapport:
-
-- **D**: Generel profil, styrker, udviklingsomrade, rolle i teamet (som angivet)
-- **I**: Generel profil, styrker, udviklingsomrade, rolle i teamet
-- **S**: Generel profil, styrker, udviklingsomrade, rolle i teamet
-- **C**: Generel profil, styrker, udviklingsomrade, rolle i teamet (bemerk: C omdoebes til "Samvittighedsfuldhed" i rapporten)
-
-Download-funktionen i `LeaderDashboard.tsx` opdateres til at inkludere de nye felter i HTML-rapporten med sektioner for Generel Profil, Styrker, Udviklingsomrade og I Teamet.
+### Side 3 -- Lederguide
+- **"Gode rad til lederen"**: 3-4 konkrete bullet points tilpasset hver DiSC-profil
+- **I Teamet**: Rollen i teamet fra `discDescriptions.teamRole`
+- **Noegleegenskaber**: Badges med traits
 
 ---
 
 ## Tekniske detaljer
 
-### Filer der andres:
+### Nye afhangigheder
+- **jspdf** -- PDF-generering i browseren
+- **html2canvas** -- Konverterer HTML/React-komponenter til billeder til PDF
 
-1. **`src/index.css`** -- Alle CSS-variabler erstattes med pdk12-vardier, typografi opdateres til Inter-only
-2. **`src/lib/disc-data.ts`** -- `discDescriptions` udvides med `generalProfile`, `strengths`, `developmentArea`, `teamRole` felter
-3. **`src/pages/Login.tsx`** -- Polygon-logo erstatter D-ikonet, opdaterede komponent-stile
-4. **`src/pages/EmployeeDashboard.tsx`** -- Logo i header, fjern Playfair Display inline-stil
-5. **`src/pages/LeaderDashboard.tsx`** -- Logo i header, fjern Playfair Display, udvid HTML-rapport med nye beskrivelser
-6. **`index.html`** -- Opdater font-link til kun Inter (fjern Playfair Display), opdater titel
-7. **`tailwind.config.ts`** -- Tilfoej `fontFamily: { sans: ['Inter', ...] }` til theme
+### Nye filer
+
+1. **`src/lib/disc-report-data.ts`** -- Ny fil med udvidede profiltekster:
+   - `motivation` tekster per DiSC-type (fra sporgsmal 4-kontekst)
+   - `underPressure` tekster per DiSC-type (fra sporgsmal 3-kontekst)
+   - `communication` tekster per DiSC-type (fra sporgsmal 2-kontekst)
+   - `leaderTips` -- 3-4 bullet points per DiSC-type med rad til lederen
+
+2. **`src/components/DiscReportTemplate.tsx`** -- Skjult React-komponent der renderer hele rapporten som HTML:
+   - Bruger Tailwind-klasser og Polygon-farver
+   - Indeholder et `<BarChart>` fra recharts med D/I/S/C-point
+   - Formateret som A4 (794x1123 px) med print-venligt layout
+   - Sektioner: Header, Diagram, Profil, Motivation, Under pres, Kommunikation, Styrker, Udviklingsomrade, Lederguide, Noegleegenskaber
+
+### AEndrede filer
+
+3. **`src/pages/LeaderDashboard.tsx`**:
+   - `fetchTeam()` udvides til ogsa at hente `answers` fra `disc_results`
+   - `TeamMember` interface far et nyt `answers` felt
+   - `downloadReport()` erstattes med ny funktion der:
+     1. Beregner D/I/S/C point-fordeling fra `answers`
+     2. Renderer `DiscReportTemplate` i et skjult DOM-element
+     3. Bruger `html2canvas` til at fange indholdet
+     4. Opretter PDF med `jspdf` og downloader den
+   - Rapport-knappens tekst aendres til "Fuld Rapport"
+
+4. **`src/lib/disc-data.ts`** -- Uaendret (eksisterende beskrivelser genbruges)
+
+### Point-beregning til diagram
+Medarbejderens `answers` (array af ["D","I","S","C",...]) taelles op:
+```
+{ D: 2, I: 1, S: 1, C: 1 }
+```
+Disse vaerdier vises som 4 soejler i rapporten (maks 5 point).
+
+### PDF-generering (flow)
+1. Leder klikker "Fuld Rapport"
+2. `DiscReportTemplate` renderes i en skjult `<div>` med fixed A4-dimensioner
+3. `html2canvas` tager et screenshot af komponenten
+4. `jspdf` opretter en A4 PDF og indsaetter billedet
+5. PDF downloades som `DiSC-rapport-[navn].pdf`
+6. Den skjulte `<div>` fjernes
 
