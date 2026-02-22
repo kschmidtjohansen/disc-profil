@@ -3,6 +3,8 @@ export const da = {
     login: "Log ind",
     logout: "Log ud",
     loading: "Indlæser...",
+    navDiscTest: "DISC Test",
+    navDashboard: "Dashboard",
     employee: "Medarbejder",
     leader: "Leder",
     discProfile: "DISC Profil",

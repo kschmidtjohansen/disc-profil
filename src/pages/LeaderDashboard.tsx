@@ -232,13 +232,9 @@ const LeaderDashboard = () => {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="bg-popover">
-        <DropdownMenuItem onClick={() => navigate("/disc-test")} className="cursor-pointer">
-          {location.pathname === "/disc-test" && <Check className="mr-2 h-4 w-4" />}
-          <span className={location.pathname !== "/disc-test" ? "ml-6" : ""}>{t.common.employee}</span>
-        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/dashboard")} className="cursor-pointer">
           {location.pathname === "/dashboard" && <Check className="mr-2 h-4 w-4" />}
-          <span className={location.pathname !== "/dashboard" ? "ml-6" : ""}>{t.common.leader}</span>
+          <span className={location.pathname !== "/dashboard" ? "ml-6" : ""}>{t.common.navDashboard}</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/team-overview")} className="cursor-pointer">
           {location.pathname === "/team-overview" && <Check className="mr-2 h-4 w-4" />}
@@ -247,6 +243,10 @@ const LeaderDashboard = () => {
         <DropdownMenuItem onClick={() => navigate("/team-analyzer")} className="cursor-pointer">
           {location.pathname === "/team-analyzer" && <Check className="mr-2 h-4 w-4" />}
           <span className={location.pathname !== "/team-analyzer" ? "ml-6" : ""}>{t.teamAnalyzer.title}</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/disc-test")} className="cursor-pointer">
+          {location.pathname === "/disc-test" && <Check className="mr-2 h-4 w-4" />}
+          <span className={location.pathname !== "/disc-test" ? "ml-6" : ""}>{t.common.navDiscTest}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

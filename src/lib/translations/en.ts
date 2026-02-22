@@ -3,6 +3,8 @@ import type { da } from "./da";
 export const en: typeof da = {
   common: {
     login: "Log in",
+    navDiscTest: "DISC Test",
+    navDashboard: "Dashboard",
     logout: "Log out",
     loading: "Loading...",
     employee: "Employee",
