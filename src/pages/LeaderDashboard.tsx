@@ -462,7 +462,7 @@ const LeaderDashboard = () => {
                                 <TooltipContent>{generatingId === member.id ? t.leader.generating : t.leader.fullReport}</TooltipContent>
                               </Tooltip>
                             )}
-                            {!member.primary_style && (
+                            {member.id !== user?.id && (
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Button
