@@ -70,51 +70,150 @@ export const en: typeof da = {
   },
   disc: {
     questions: [
-      {
-        id: 1, question: "How do you usually approach a new task?",
-        options: [
-          { label: "I dive right in and want to see quick results.", style: "D" },
-          { label: "I gather the team to brainstorm and create enthusiasm.", style: "I" },
-          { label: "I prefer to have a clear plan and know what's expected before I start.", style: "S" },
-          { label: "I thoroughly research all details and data to make sure it's done correctly.", style: "C" },
-        ],
-      },
-      {
-        id: 2, question: "How do you communicate best?",
-        options: [
-          { label: "Directly and to the point – I prefer short messages without beating around the bush.", style: "D" },
-          { label: "Openly and talkatively – I prefer informal conversation with room for humor.", style: "I" },
-          { label: "Calmly and by listening – I want to make sure everyone on the team is heard.", style: "S" },
-          { label: "In writing and precisely – I like having facts and details in writing.", style: "C" },
-        ],
-      },
-      {
-        id: 3, question: "How do you react under pressure or stress?",
-        options: [
-          { label: "I become impatient and try to take control to force a solution.", style: "D" },
-          { label: "I can become emotional or disorganized, but try to talk my way out of it.", style: "I" },
-          { label: "I withdraw a bit and try to avoid open conflict to keep the peace.", style: "S" },
-          { label: "I become extra critical of details and may over-analyze things.", style: "C" },
-        ],
-      },
-      {
-        id: 4, question: "What motivates you most in your work?",
-        options: [
-          { label: "Reaching ambitious goals, winning and getting responsibility.", style: "D" },
-          { label: "Social recognition, fun at work and teamwork.", style: "I" },
-          { label: "Security, clear frameworks and being able to help my colleagues.", style: "S" },
-          { label: "Delivering the highest quality work and having time to dive deep.", style: "C" },
-        ],
-      },
-      {
-        id: 5, question: "What role do you typically take in a meeting?",
-        options: [
-          { label: "The one who cuts through and pushes for a decision.", style: "D" },
-          { label: "The one who keeps the mood up and comes with creative ideas.", style: "I" },
-          { label: "The one who mediates and makes sure we agree before moving on.", style: "S" },
-          { label: "The one who asks the critical questions and points out what we need to investigate.", style: "C" },
-        ],
-      },
+      { id: 1, question: "How do you usually approach a new task?", options: [
+        { label: "I dive right in and want to see quick results.", style: "D" },
+        { label: "I gather the team to brainstorm and create enthusiasm.", style: "I" },
+        { label: "I prefer to have a clear plan and know what's expected before I start.", style: "S" },
+        { label: "I thoroughly research all details and data to make sure it's done correctly.", style: "C" },
+      ]},
+      { id: 2, question: "How do you communicate best?", options: [
+        { label: "Directly and to the point – I prefer short messages without beating around the bush.", style: "D" },
+        { label: "Openly and talkatively – I prefer informal conversation with room for humor.", style: "I" },
+        { label: "Calmly and by listening – I want to make sure everyone on the team is heard.", style: "S" },
+        { label: "In writing and precisely – I like having facts and details in writing.", style: "C" },
+      ]},
+      { id: 3, question: "How do you react under pressure or stress?", options: [
+        { label: "I become impatient and try to take control to force a solution.", style: "D" },
+        { label: "I can become emotional or disorganized, but try to talk my way out of it.", style: "I" },
+        { label: "I withdraw a bit and try to avoid open conflict to keep the peace.", style: "S" },
+        { label: "I become extra critical of details and may over-analyze things.", style: "C" },
+      ]},
+      { id: 4, question: "What motivates you most in your work?", options: [
+        { label: "Reaching ambitious goals, winning and getting responsibility.", style: "D" },
+        { label: "Social recognition, fun at work and teamwork.", style: "I" },
+        { label: "Security, clear frameworks and being able to help my colleagues.", style: "S" },
+        { label: "Delivering the highest quality work and having time to dive deep.", style: "C" },
+      ]},
+      { id: 5, question: "What role do you typically take in a meeting?", options: [
+        { label: "The one who cuts through and pushes for a decision.", style: "D" },
+        { label: "The one who keeps the mood up and comes with creative ideas.", style: "I" },
+        { label: "The one who mediates and makes sure we agree before moving on.", style: "S" },
+        { label: "The one who asks the critical questions and points out what we need to investigate.", style: "C" },
+      ]},
+      { id: 6, question: "How do you handle deadlines?", options: [
+        { label: "I pick up the pace and push to reach the goal – whatever it takes.", style: "D" },
+        { label: "I motivate the team and keep energy high so we reach it together.", style: "I" },
+        { label: "I work steadily and methodically to ensure we deliver on time.", style: "S" },
+        { label: "I plan carefully and check all details so quality doesn't suffer.", style: "C" },
+      ]},
+      { id: 7, question: "What is your preferred leadership style?", options: [
+        { label: "I lead from the front and make quick decisions.", style: "D" },
+        { label: "I inspire and motivate others with enthusiasm and vision.", style: "I" },
+        { label: "I support and guide my team with patience and care.", style: "S" },
+        { label: "I lead with data, structure and clear processes.", style: "C" },
+      ]},
+      { id: 8, question: "How do you react when a project is behind schedule?", options: [
+        { label: "I take charge and ruthlessly prioritize to recover lost ground.", style: "D" },
+        { label: "I rally the team, boost morale and find creative solutions.", style: "I" },
+        { label: "I stay calm, stick to the plan and put in extra work to get there.", style: "S" },
+        { label: "I analyze what went wrong and create a new, detailed plan.", style: "C" },
+      ]},
+      { id: 9, question: "How do you typically solve problems?", options: [
+        { label: "I make a quick decision and act immediately.", style: "D" },
+        { label: "I brainstorm with others and find a creative solution.", style: "I" },
+        { label: "I listen to all perspectives and find a solution everyone can support.", style: "S" },
+        { label: "I analyze the problem thoroughly and find the most logical solution.", style: "C" },
+      ]},
+      { id: 10, question: "How do you handle criticism?", options: [
+        { label: "I take it as a challenge and use it to prove my worth.", style: "D" },
+        { label: "I may take it personally, but try to see the positive in the feedback.", style: "I" },
+        { label: "I listen patiently and try to understand the other person's perspective.", style: "S" },
+        { label: "I evaluate the criticism objectively and use it to improve my work.", style: "C" },
+      ]},
+      { id: 11, question: "How do you make decisions?", options: [
+        { label: "Quickly and decisively – I trust my gut feeling.", style: "D" },
+        { label: "Intuitively and with input from those around me.", style: "I" },
+        { label: "Carefully and in consultation with others, so everyone is on board.", style: "S" },
+        { label: "Analytically and fact-based – I explore all options first.", style: "C" },
+      ]},
+      { id: 12, question: "How do you react to setbacks?", options: [
+        { label: "I bounce back quickly and find a new path to the goal.", style: "D" },
+        { label: "I talk to others about it and find renewed motivation.", style: "I" },
+        { label: "I accept it calmly and adapt to the new situation.", style: "S" },
+        { label: "I analyze what went wrong and ensure it doesn't happen again.", style: "C" },
+      ]},
+      { id: 13, question: "How do you work best in a team?", options: [
+        { label: "I naturally take the leadership role and delegate tasks.", style: "D" },
+        { label: "I'm the social driving force that keeps team spirit up.", style: "I" },
+        { label: "I'm the reliable one who always delivers my part and supports others.", style: "S" },
+        { label: "I'm the specialist who ensures quality and professional standards.", style: "C" },
+      ]},
+      { id: 14, question: "How do you handle a stressful day?", options: [
+        { label: "I focus intensely and cut everything unnecessary.", style: "D" },
+        { label: "I take a break to talk with colleagues and recharge socially.", style: "I" },
+        { label: "I keep a calm pace and take one thing at a time.", style: "S" },
+        { label: "I make a priority list and work through it systematically.", style: "C" },
+      ]},
+      { id: 15, question: "What is your approach to change?", options: [
+        { label: "I see it as an opportunity and jump right in.", style: "D" },
+        { label: "I'm excited and see it as something new and thrilling.", style: "I" },
+        { label: "I prefer gradual changes and time to adapt.", style: "S" },
+        { label: "I want to understand the background and consequences before accepting it.", style: "C" },
+      ]},
+      { id: 16, question: "How do you typically start your workday?", options: [
+        { label: "I go straight to the most important task.", style: "D" },
+        { label: "I greet colleagues, check in socially and plan loosely.", style: "I" },
+        { label: "I follow my routine and start calmly and structured.", style: "S" },
+        { label: "I review my task list and carefully prioritize the day's work.", style: "C" },
+      ]},
+      { id: 17, question: "How do you react to conflicts in the team?", options: [
+        { label: "I confront the problem directly and demand a solution.", style: "D" },
+        { label: "I try to lighten the mood with humor and positive dialogue.", style: "I" },
+        { label: "I mediate quietly and try to find a compromise.", style: "S" },
+        { label: "I analyze the situation objectively and propose a fair solution.", style: "C" },
+      ]},
+      { id: 18, question: "What drives you to do your best?", options: [
+        { label: "Competition and the desire to be the best.", style: "D" },
+        { label: "Recognition from others and the joy of collaborating.", style: "I" },
+        { label: "Knowing that my contribution helps the team and creates security.", style: "S" },
+        { label: "Delivering flawless work that I can be proud of.", style: "C" },
+      ]},
+      { id: 19, question: "How do you handle feedback from your leader?", options: [
+        { label: "I want it short and direct – give me the bottom line.", style: "D" },
+        { label: "I prefer a positive and encouraging tone with room for dialogue.", style: "I" },
+        { label: "I want it in a safe, private conversation with time to reflect.", style: "S" },
+        { label: "I want it specific, fact-based and with concrete examples.", style: "C" },
+      ]},
+      { id: 20, question: "What is your approach to planning?", options: [
+        { label: "I plan broadly and adapt along the way – action matters more.", style: "D" },
+        { label: "I keep planning flexible and open to spontaneous ideas.", style: "I" },
+        { label: "I make a realistic plan with fixed milestones and stick to it.", style: "S" },
+        { label: "I create a detailed plan with timelines, risks and backup scenarios.", style: "C" },
+      ]},
+      { id: 21, question: "How do you prioritize your tasks?", options: [
+        { label: "I focus on what delivers the biggest results fastest.", style: "D" },
+        { label: "I start with what's most exciting or involves others.", style: "I" },
+        { label: "I take tasks in the order they come and make sure none are forgotten.", style: "S" },
+        { label: "I assess importance and complexity and create a systematic plan.", style: "C" },
+      ]},
+      { id: 22, question: "What best describes your work ethic?", options: [
+        { label: "Results count – I do whatever it takes to reach the goal.", style: "D" },
+        { label: "Collaboration and good vibes make work meaningful.", style: "I" },
+        { label: "Reliability and loyalty – people can always count on me.", style: "S" },
+        { label: "Precision and professionalism – I always deliver thorough work.", style: "C" },
+      ]},
+      { id: 23, question: "How do you best learn new skills?", options: [
+        { label: "By jumping in and learning through practice.", style: "D" },
+        { label: "By learning together with others in an interactive and social process.", style: "I" },
+        { label: "By getting enough time, clear instructions and the chance to practice at my own pace.", style: "S" },
+        { label: "By reading, researching and thoroughly understanding the theory before trying in practice.", style: "C" },
+      ]},
+      { id: 24, question: "How do you react to sudden changes in your plans?", options: [
+        { label: "I adapt quickly and see it as a new challenge.", style: "D" },
+        { label: "I'm flexible and see it as an opportunity for something new and exciting.", style: "I" },
+        { label: "I need a little time to adjust, but adapt quietly.", style: "S" },
+        { label: "I get frustrated because my plan is disrupted, and want to understand the reason before continuing.", style: "C" },
+      ]},
     ],
     descriptions: {
       D: {
