@@ -1,28 +1,55 @@
 
 
-# Opdatering af rapport-tekster fra tabel
+# Fix: Tildel rolle til eksisterende brugere uden rolle
 
-## Hvad aendres
+## Problem
+Kasper Schmidt Johansen er oprettet i `profiles`, men har ingen post i `user_roles`. Login-koden opretter kun en rolle naar en **ny** profil oprettes. Naar en eksisterende bruger logger ind uden rolle, fejler opslaget og brugeren faar en fejlmeddelelse.
 
-Filen `src/lib/disc-report-data.ts` opdateres med de nye, kortere tekster fra din tabel for tre felter: **motivation**, **communication** og **leaderTips**. Feltet **underPressure** beholdes som det er, da det ikke er med i tabellen.
+## Loesning
 
-## De nye tekster
+### 1. Indsaet manglende rolle for Kasper (databasefix)
+Kasper er den foerste bruger, saa han faar rollen "leader":
 
-| Profil | Motivation | Kommunikation | Ledelsesrad |
-|--------|-----------|---------------|-------------|
-| D | Udfordringer, magt til at beslutte og hurtige resultater. | Vaer direkte, hold dig til fakta, og undga for meget "smalltalk". | Giv dem ansvar, saet klare mal, og lad dem finde vejen dertil selv. |
-| I | Social anerkendelse, begejstring og frihed fra rutiner. | Vaer entusiastisk, giv plads til humor og fokuser pa det positive. | Anerkend deres indsats offentligt, og hjaelp dem med at holde strukturen. |
-| S | Tryghed, faste rammer og tid til at hjaelpe andre. | Vaer talmodig, tal roligt, og giv dem tid til at taenke sig om. | Giv dem tryghed i forandringer, og vaer tydelig omkring forventningerne. |
-| C | Kvalitet, praecision og logisk argumentation. | Vaer detaljeret, brug data, og undga at vaere for personlig/folelsesladet. | Giv dem tid til fordybelse, og respekter deres behov for ordentlighed. |
+```sql
+INSERT INTO user_roles (user_id, role)
+VALUES ('9c8e48b3-35a9-4736-aedb-41c27a95d7fc', 'leader');
+```
 
-## Tekniske detaljer
+### 2. Opdater login-flowet i `src/pages/Login.tsx`
+Aendr logikken saa den ogsa haandterer eksisterende profiler **uden** rolle:
 
-### Fil der aendres: `src/lib/disc-report-data.ts`
+- Naar en eksisterende profil findes (linje 32-51), tjek om der allerede er en rolle
+- Hvis **ingen rolle** findes, opret en med default "employee" (eller "leader" hvis det er den foerste bruger)
+- Brug `.maybeSingle()` i stedet for `.single()` paa rolle-opslaget for at undgaa 406-fejlen
 
-- **motivation**: Erstattes med de nye korte tekster for D, I, S, C
-- **communication**: Erstattes med de nye korte tekster for D, I, S, C
-- **leaderTips**: Hvert array reduceres til en enkelt rad (fra 4 til 1), da tabellen kun har et ledelsesrad per profil
-- **underPressure**: Beholdes uaendret (ikke inkluderet i tabellen)
+Konkret aendring i `handleLogin`:
 
-Ingen andre filer aendres -- `DiscReportTemplate.tsx` og `LeaderDashboard.tsx` bruger allerede disse felter korrekt.
+```
+// Efter at have fundet eksisterende profil:
+if (existing) {
+  profileId = existing.id;
+
+  // Tjek om rolle mangler, og opret den hvis nødvendig
+  const { data: existingRole } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", profileId)
+    .maybeSingle();
+
+  if (!existingRole) {
+    const { data: countData } = await supabase.rpc("get_user_count");
+    const isFirst = (countData ?? 0) === 1; // kun denne bruger
+    await supabase.from("user_roles").insert({
+      user_id: profileId,
+      role: isFirst ? "leader" : "employee",
+    });
+  }
+}
+```
+
+Og aendr det afsluttende rolle-opslag (linje 53-57) til at bruge `.maybeSingle()` i stedet for `.single()`.
+
+### Filer der aendres
+- **`src/pages/Login.tsx`** -- Opdater login-logik til at haandtere manglende roller
+- **Database** -- Indsaet rolle for Kasper
 
