@@ -94,7 +94,7 @@ const Login = () => {
           <div className="mx-auto mb-2">
             <img src={polygonLogo} alt="Polygon Group" className="h-12 mx-auto" />
           </div>
-          <CardTitle className="text-3xl">DiSC Profilering</CardTitle>
+          <CardTitle className="text-3xl">DISC Profil</CardTitle>
           <CardDescription className="text-base">
             Indtast dit fulde navn for at logge ind eller oprette en profil
           </CardDescription>

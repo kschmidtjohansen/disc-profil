@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { discDescriptions } from "@/lib/disc-data";
@@ -9,7 +9,8 @@ import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Download, ShieldCheck, Users, Loader2 } from "lucide-react";
+import { LogOut, Download, ShieldCheck, Users, Loader2, ChevronDown, Check } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import polygonLogo from "@/assets/polygon-logo.svg";
 import DiscReportTemplate from "@/components/DiscReportTemplate";
 import type { Json } from "@/integrations/supabase/types";
@@ -27,6 +28,7 @@ interface TeamMember {
 const LeaderDashboard = () => {
   const { user, logout, setUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +42,6 @@ const LeaderDashboard = () => {
 
   useEffect(() => {
     if (!user) { navigate("/"); return; }
-    if (user.role !== "leader") { navigate("/employee"); return; }
     fetchTeam();
   }, [user, navigate]);
 
@@ -101,7 +102,6 @@ const LeaderDashboard = () => {
     const scores = calculateScores(member.answers);
     setReportData({ fullName: member.full_name, primaryStyle: member.primary_style, scores });
 
-    // Wait for render
     await new Promise((r) => setTimeout(r, 500));
 
     try {
@@ -143,12 +143,33 @@ const LeaderDashboard = () => {
 
   if (loading) return <div className="flex min-h-screen items-center justify-center"><p>Indlæser...</p></div>;
 
+  const NavDropdown = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex items-center gap-1 text-xl font-semibold text-primary-foreground hover:opacity-80 transition-opacity">
+          DISC Profil
+          <ChevronDown className="h-4 w-4" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="bg-popover">
+        <DropdownMenuItem onClick={() => navigate("/employee")} className="cursor-pointer">
+          {location.pathname === "/employee" && <Check className="mr-2 h-4 w-4" />}
+          <span className={location.pathname !== "/employee" ? "ml-6" : ""}>Medarbejder</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/leader")} className="cursor-pointer">
+          {location.pathname === "/leader" && <Check className="mr-2 h-4 w-4" />}
+          <span className={location.pathname !== "/leader" ? "ml-6" : ""}>Leder</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <img src={polygonLogo} alt="Polygon" className="h-8 brightness-0 invert" />
-          <span className="text-xl font-semibold">DiSC Profilering – Leder</span>
+          <NavDropdown />
         </div>
         <div className="flex items-center gap-3">
           <span className="text-sm opacity-80">{user?.full_name}</span>
@@ -183,7 +204,7 @@ const LeaderDashboard = () => {
                 <TableRow>
                   <TableHead>Navn</TableHead>
                   <TableHead>Rolle</TableHead>
-                  <TableHead>DiSC Profil</TableHead>
+                  <TableHead>DISC Profil</TableHead>
                   <TableHead className="text-right">Handlinger</TableHead>
                 </TableRow>
               </TableHeader>
@@ -234,7 +255,6 @@ const LeaderDashboard = () => {
         </Card>
       </main>
 
-      {/* Hidden report template for PDF generation */}
       {reportData && (
         <div style={{ position: "fixed", left: "-9999px", top: 0 }}>
           <DiscReportTemplate ref={reportRef} {...reportData} />

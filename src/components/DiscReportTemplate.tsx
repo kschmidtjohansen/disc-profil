@@ -43,8 +43,8 @@ const DiscReportTemplate = forwardRef<HTMLDivElement, DiscReportTemplateProps>(
             </div>
           </div>
 
-          <h1 style={{ fontSize: 28, fontWeight: 700, color: "#00aeef", margin: "24px 0 8px" }}>DiSC Profilrapport</h1>
-          <p style={{ fontSize: 14, color: "#718096", marginBottom: 32 }}>Personlig adfærdsprofil baseret på DiSC-modellen</p>
+          <h1 style={{ fontSize: 28, fontWeight: 700, color: "#00aeef", margin: "24px 0 8px" }}>DISC Profilrapport</h1>
+          <p style={{ fontSize: 14, color: "#718096", marginBottom: 32 }}>Personlig adfærdsprofil baseret på DISC-modellen</p>
 
           {/* Chart */}
           <div style={{ marginBottom: 32 }}>
@@ -147,7 +147,7 @@ const DiscReportTemplate = forwardRef<HTMLDivElement, DiscReportTemplateProps>(
           </div>
 
           <div style={{ marginTop: 80, borderTop: "1px solid #e2e8f0", paddingTop: 16, fontSize: 11, color: "#a0aec0", textAlign: "center" }}>
-            Genereret af DiSC Profilerings-app – Polygon Group – {date}
+            Genereret af DISC Profil – Polygon Group – {date}
           </div>
         </div>
       </div>
