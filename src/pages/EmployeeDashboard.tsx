@@ -55,11 +55,12 @@ const EmployeeDashboard = () => {
   const handleSubmit = async () => {
     if (!user) return;
     const primaryStyle = calculatePrimaryStyle(answers);
-    await supabase.from("disc_results").insert({
+    await supabase.from("disc_results").upsert({
       user_id: user.id,
       answers: answers as unknown as any,
       primary_style: primaryStyle,
-    });
+      completed_at: new Date().toISOString(),
+    }, { onConflict: "user_id" });
     setDiscResult(primaryStyle);
     setTestStarted(false);
   };

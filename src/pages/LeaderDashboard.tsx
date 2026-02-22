@@ -49,7 +49,7 @@ const LeaderDashboard = () => {
 
   useEffect(() => {
     if (!user) { navigate("/"); return; }
-    if (user.role !== "leader") {
+    if (user.status !== "approved" || user.role !== "leader") {
       toast({ title: t.common.accessDenied, description: t.common.leaderOnly });
       navigate("/disc-test");
       return;
@@ -71,7 +71,7 @@ const LeaderDashboard = () => {
   };
 
   const handleReject = async (userId: string, name: string) => {
-    await supabase.from("user_roles").delete().eq("user_id", userId);
+    // CASCADE handles user_roles and disc_results automatically
     await supabase.from("profiles").delete().eq("id", userId);
     toast({ title: t.approval.rejected, description: t.approval.rejectedMessage.replace("{name}", name) });
     fetchPending();
@@ -173,7 +173,7 @@ const LeaderDashboard = () => {
 
   const handleDeleteMember = async (member: TeamMember) => {
     if (!confirm(t.leader.deleteConfirm.replace("{name}", member.full_name))) return;
-    await supabase.from("user_roles").delete().eq("user_id", member.id);
+    // CASCADE handles user_roles and disc_results automatically
     await supabase.from("profiles").delete().eq("id", member.id);
     toast({ title: t.leader.deleted.replace("{name}", member.full_name) });
     fetchTeam();

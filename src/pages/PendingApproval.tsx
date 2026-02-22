@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -14,15 +14,14 @@ const PendingApproval = () => {
   const { t } = useTranslation();
   const [checking, setChecking] = useState(false);
 
-  if (!user) {
-    navigate("/");
-    return null;
-  }
+  useEffect(() => {
+    if (!user) { navigate("/"); return; }
+    if (user.status === "approved") {
+      navigate(user.role === "leader" ? "/dashboard" : "/disc-test");
+    }
+  }, [user, navigate]);
 
-  if (user.status === "approved") {
-    navigate(user.role === "leader" ? "/dashboard" : "/disc-test");
-    return null;
-  }
+  if (!user) return null;
 
   const checkStatus = async () => {
     setChecking(true);
