@@ -1,150 +1,88 @@
-# Tre aendringer: URL-omdoebning, flersproget support og rollebaseret adgang
-
-## 1. URL-aendringer
-
-Ruterne aendres i `src/App.tsx`:
-
-- `/employee` bliver til `/disc-test` (DISC-testen)
-- `/leader` forbliver `/dashboard` (dashboard)
-
-Alle `navigate()`-kald og dropdown-links opdateres i:
-
-- `src/App.tsx` (Routes)
-- `src/pages/Login.tsx` (redirect efter login)
-- `src/pages/EmployeeDashboard.tsx` (NavDropdown + navigate)
-- `src/pages/LeaderDashboard.tsx` (NavDropdown + navigate + role toggle redirect)
-
-## 2. Flersproget support (i18n)
-
-### Understottede sprog
-
-Dansk (da), Tysk (de), Engelsk (en), Spansk (es), Fransk (fr), Hollandsk (nl), Svensk (sv), Norsk (no), Finsk (fi)
-
-### Arkitektur
-
-- Ny fil `src/lib/i18n.ts` med en React context der holder det valgte sprog
-- Ny fil `src/lib/translations/` mappe med en fil per sprog (da.ts, en.ts, de.ts osv.)
-- Hvert sprogobjekt indeholder alle UI-tekster: login, navigation, spoergsmaal, resultater, rapport-labels osv.
-- En `useTranslation()` hook returnerer det aktive sprogs tekster
-- Standardsprog: Dansk
-
-### Sprogvaelger
-
-- En lille dropdown (flag/sprogkode) i headeren pa alle sider
-- Gemmes i localStorage sa valget huskes
-- Placeres ved siden af brugerens navn i headeren
-
-### Filer der oprettes
 
 
-| Fil                          | Indhold                                               |
-| ---------------------------- | ----------------------------------------------------- |
-| `src/lib/i18n.tsx`           | I18nProvider context, useTranslation hook, sprogtypes |
-| `src/lib/translations/da.ts` | Dansk (nuvaerende tekster)                            |
-| `src/lib/translations/en.ts` | Engelsk                                               |
-| `src/lib/translations/de.ts` | Tysk                                                  |
-| `src/lib/translations/es.ts` | Spansk                                                |
-| `src/lib/translations/fr.ts` | Fransk                                                |
-| `src/lib/translations/nl.ts` | Hollandsk                                             |
-| `src/lib/translations/sv.ts` | Svensk                                                |
-| `src/lib/translations/no.ts` | Norsk                                                 |
-| `src/lib/translations/fi.ts` | Finsk                                                 |
+# Tre rettelser: Mobil navbar, logo-navigation og flere DISC-spoergsmaal
 
+## 1. Fix mobil navbar paa /dashboard
+
+Headeren paa LeaderDashboard og EmployeeDashboard bruger `flex justify-between` med mange elementer (logo, NavDropdown, sprogvaelger, brugernavn, logout-knap) paa en enkelt linje. Paa smaa skaerme overlapper disse.
+
+### Loesning
+- Giv headeren `flex-wrap` og juster layout til mobil med responsive klasser
+- Paa mobil: logo + nav-dropdown paa foerste linje, sprogvaelger + brugernavn + logout paa anden linje
+- Skjul brugernavnet paa meget smaa skaerme (`hidden sm:inline`)
+- Reducer spacing og font-stoerrelse paa mobil
+- Anvend samme fix i baade `EmployeeDashboard.tsx` og `LeaderDashboard.tsx`
+
+### Konkret aendring
+Header-elementet aendres fra:
+```
+px-6 py-4 flex justify-between items-center
+```
+til:
+```
+px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap justify-between items-center gap-2
+```
+
+Hoejre side wraps bedre med `flex-wrap` og `gap-2`. Brugernavn faar `hidden sm:inline`. Sprogvaelger-knappen forkortes paa mobil (kun flag-ikon, uden tekst).
+
+## 2. Logo klikbart - navigerer til forsiden
+
+Logoet i headeren (`<img src={polygonLogo}>`) skal vaere klikbart og navigere til `/disc-test` (forsiden for medarbejdere) eller `/` (login, hvis ikke logget ind).
+
+### Loesning
+- Wrap logo-billedet i en `<button>` eller `<a>`-lignende element med `onClick={() => navigate("/disc-test")}`
+- Anvend `cursor-pointer` styling
+- Implementeres i baade `EmployeeDashboard.tsx` og `LeaderDashboard.tsx`
+
+## 3. Udvid DISC-testen fra 5 til 24 spoergsmaal
+
+Den nuvaerende test har kun 5 spoergsmaal, hvilket er alt for faa til en paalidelig DISC-profil. En typisk DISC-test har 24-28 scenariebaserede spoergsmaal.
+
+### Nye spoergsmaal (24 i alt)
+Baseret paa autentiske DISC-testformater udvides med spoergsmaal der daekker:
+
+1. Hvordan griber du en ny opgave an?
+2. Hvordan kommunikerer du bedst?
+3. Hvordan reagerer du under pres?
+4. Hvad motiverer dig mest?
+5. Hvilken rolle tager du i et moede?
+6. Hvordan haandterer du deadlines?
+7. Hvad er din ledelsesstil?
+8. Hvordan reagerer du naar et projekt er bagud?
+9. Hvordan loeser du problemer?
+10. Hvordan haandterer du kritik?
+11. Hvordan traffer du beslutninger?
+12. Hvordan reagerer du paa tilbageslag?
+13. Hvordan arbejder du i et team?
+14. Hvordan haandterer du stress?
+15. Hvad er din tilgang til forandring?
+16. Hvordan starter du en ny opgave?
+17. Hvordan reagerer du paa konflikter?
+18. Hvad driver dig til succes?
+19. Hvordan haandterer du feedback?
+20. Hvad er din tilgang til planlægning?
+21. Hvordan prioriterer du opgaver?
+22. Hvad beskriver din arbejdsmoral?
+23. Hvordan laerer du nye faerdigheder?
+24. Hvordan reagerer du paa pludselige aendringer?
 
 ### Filer der aendres
 
-- `src/App.tsx` -- wrap med I18nProvider
-- `src/pages/Login.tsx` -- brug t() for tekster + sprogvaelger
-- `src/pages/EmployeeDashboard.tsx` -- brug t() for alle tekster inkl. spoergsmaal
-- `src/pages/LeaderDashboard.tsx` -- brug t() for alle tekster
-- `src/components/DiscReportTemplate.tsx` -- brug t() for rapport-labels
-- `src/lib/disc-data.ts` -- spoergsmaal og beskrivelser flyttes ind i oversaettelsesfilerne
-- `src/lib/disc-report-data.ts` -- rapport-tekster flyttes ind i oversaettelsesfilerne
+| Fil | Aendring |
+|-----|---------|
+| `src/lib/translations/da.ts` | Udvid `disc.questions` fra 5 til 24 spoergsmaal (dansk) |
+| `src/lib/translations/en.ts` | Udvid til 24 spoergsmaal (engelsk) |
+| `src/lib/translations/de.ts` | Udvid til 24 spoergsmaal (tysk) |
+| `src/lib/translations/es.ts` | Udvid til 24 spoergsmaal (spansk) |
+| `src/lib/translations/fr.ts` | Udvid til 24 spoergsmaal (fransk) |
+| `src/lib/translations/nl.ts` | Udvid til 24 spoergsmaal (hollandsk) |
+| `src/lib/translations/sv.ts` | Udvid til 24 spoergsmaal (svensk) |
+| `src/lib/translations/no.ts` | Udvid til 24 spoergsmaal (norsk) |
+| `src/lib/translations/fi.ts` | Udvid til 24 spoergsmaal (finsk) |
+| `src/lib/disc-data.ts` | Opdater `discQuestions` til 24 spoergsmaal |
+| `src/pages/EmployeeDashboard.tsx` | Mobil navbar fix + klikbart logo |
+| `src/pages/LeaderDashboard.tsx` | Mobil navbar fix + klikbart logo |
 
-### Oversaettelsesstruktur (eksempel)
+### Scoring
+Med 24 spoergsmaal faar hvert DISC-bogstav en score fra 0-24 (i stedet for 0-5), hvilket giver en langt mere nuanceret profil. `calculatePrimaryStyle()` i `disc-data.ts` virker allerede korrekt med variabelt antal spoergsmaal.
 
-```typescript
-{
-  common: {
-    login: "Log ind",
-    logout: "Log ud",
-    loading: "Indlaeser...",
-    employee: "Medarbejder",
-    leader: "Leder",
-    discProfile: "DISC Profil",
-    // ...
-  },
-  login: {
-    title: "DISC Profil",
-    subtitle: "Indtast dit fulde navn...",
-    placeholder: "Indtast dit fulde navn",
-    button: "Log ind",
-    buttonLoading: "Logger ind...",
-    // ...
-  },
-  test: {
-    questionOf: "Spoergsmaal {current} af {total}",
-    chooseAnswer: "Vaelg det svar, der passer dig bedst",
-    back: "Tilbage",
-    next: "Naeste",
-    submit: "Indsend svar",
-    // ...
-  },
-  disc: {
-    questions: [...], // Alle 5 spoergsmaal med options
-    descriptions: { D: {...}, I: {...}, S: {...}, C: {...} },
-    reportData: { D: {...}, I: {...}, S: {...}, C: {...} },
-  },
-  // ...
-}
-```
-
-## 3. Rollebaseret adgang til /leader
-
-### Implementering
-
-- I `LeaderDashboard.tsx`: tjek `user.role` i useEffect
-- Hvis brugeren ikke er "leader", redirect til `/disc-test` med en toast-besked
-- NavDropdown i `EmployeeDashboard` viser kun "Leder"-linket hvis brugeren har rollen "leader"
-
-### Tekniske detaljer
-
-I `LeaderDashboard.tsx`:
-
-```typescript
-useEffect(() => {
-  if (!user) { navigate("/"); return; }
-  if (user.role !== "leader") {
-    toast({ title: t('common.accessDenied'), description: t('common.leaderOnly') });
-    navigate("/employees");
-    return;
-  }
-  fetchTeam();
-}, [user, navigate]);
-```
-
-I `EmployeeDashboard.tsx` NavDropdown:
-
-```typescript
-// Vis kun Leder-linket hvis brugeren er leder
-{user?.role === "leader" && (
-  <DropdownMenuItem onClick={() => navigate("/leader")}>
-    ...Leder
-  </DropdownMenuItem>
-)}
-```
-
-## Samlet aendringsoversigt
-
-
-| Fil                                     | Type         | Aendring                                     |
-| --------------------------------------- | ------------ | -------------------------------------------- |
-| `src/lib/i18n.tsx`                      | Ny           | Context + hook for i18n                      |
-| `src/lib/translations/*.ts`             | Ny (9 filer) | Oversaettelser for hvert sprog               |
-| `src/App.tsx`                           | AEndret      | Nye URL'er + I18nProvider                    |
-| `src/pages/Login.tsx`                   | AEndret      | i18n + sprogvaelger + ny URL                 |
-| `src/pages/EmployeeDashboard.tsx`       | AEndret      | i18n + ny URL + rolletjek i dropdown         |
-| `src/pages/LeaderDashboard.tsx`         | AEndret      | i18n + ny URL + adgangskontrol               |
-| `src/components/DiscReportTemplate.tsx` | AEndret      | i18n for rapport-labels                      |
-| `src/lib/disc-data.ts`                  | AEndret      | Forenklet (tekster flyttes til translations) |
-| `src/lib/disc-report-data.ts`           | AEndret      | Forenklet (tekster flyttes til translations) |
