@@ -1,167 +1,133 @@
 
 
-# User Approval Workflow
+# Pre-approve Employees (Whitelist)
 
 ## Overview
-Add an approval system so new users must be approved by a leader before accessing the DISC test. The first user (who becomes leader) is auto-approved. All subsequent users start as `pending_approval`.
+Add a whitelist feature so leaders can pre-register employee names. These names get created in the database as `approved` profiles with `employee` role, so when they log in by name they get immediate access without waiting for approval.
 
-## 1. Database Changes
+## Changes
 
-### Add `status` column to `profiles` table
-A new column `status` of type `text` with default `'pending_approval'`. Possible values: `pending_approval`, `approved`.
+### 1. Leader Dashboard -- "Praegodkend medarbejdere" section
+In `src/pages/LeaderDashboard.tsx`, add a new Card after the pending approvals section:
 
-```sql
-ALTER TABLE public.profiles ADD COLUMN status text NOT NULL DEFAULT 'pending_approval';
--- Set all existing profiles to approved (they already have access)
-UPDATE public.profiles SET status = 'approved';
-```
+- A `Textarea` input where the leader can enter one or more full names (one per line)
+- A "Tilfoej" button that processes the names:
+  - For each name, check if a profile with that `full_name` already exists
+  - If not, create a new profile with `status: 'approved'` and a `user_roles` entry with `role: 'employee'`
+  - If already exists, skip with a toast notification
+- Show a success toast with how many names were added
+- Refresh the team list after adding
 
-### Add RLS policy for profile updates (leaders can approve)
-```sql
-CREATE POLICY "Anyone can update profiles"
-ON public.profiles FOR UPDATE
-USING (true)
-WITH CHECK (true);
-```
+### 2. Login flow -- already works correctly
+The current Login.tsx already handles this scenario perfectly:
+- When a user enters a name that exists with `status: 'approved'`, they get logged in and sent to `/disc-test`
+- When a name doesn't exist, they get `pending_approval` status
+- No changes needed to login logic
 
-### Add RLS policy for deleting profiles (leaders can reject)
-```sql
-CREATE POLICY "Anyone can delete profiles"
-ON public.profiles FOR DELETE
-USING (true);
-```
+### 3. Leader Dashboard team table -- delete pre-approved users
+Add a delete/trash button for team members who have NOT completed the test (no `primary_style`). This lets leaders remove incorrectly typed pre-approved names. The button deletes the profile and user_roles entries.
 
-Also need delete policies on `user_roles` and `disc_results` for cascade cleanup when rejecting a user:
-```sql
-CREATE POLICY "Anyone can delete user_roles"
-ON public.user_roles FOR DELETE
-USING (true);
-```
+### 4. Team table -- show "Praegodkendt" status
+In the Status column of the Leader Dashboard team table:
+- If `primary_style` exists and fresh: show green "Opdateret" badge (already works)
+- If `primary_style` exists and stale: show amber "Traenger til opfoelgning" badge (already works)
+- If NO `primary_style` (pre-approved but hasn't taken test): show a blue "Praegodkendt" badge
 
-## 2. Auth Context Update (`src/lib/auth-context.tsx`)
+### 5. Translation updates
+Add new keys to all 9 translation files:
 
-Add `status` field to User interface:
-```typescript
-interface User {
-  id: string;
-  full_name: string;
-  role: "employee" | "leader";
-  status: "pending_approval" | "approved";
-}
-```
+| Key | Danish | English |
+|-----|--------|---------|
+| `leader.preApprove` | "Praegodkend medarbejdere" | "Pre-approve employees" |
+| `leader.preApproveDesc` | "Indtast fulde navne (et pr. linje)" | "Enter full names (one per line)" |
+| `leader.preApproveAdd` | "Tilfoej" | "Add" |
+| `leader.preApproveAdded` | "{count} medarbejder(e) tilfojet" | "{count} employee(s) added" |
+| `leader.preApproveExists` | "{name} findes allerede" | "{name} already exists" |
+| `leader.statusPreApproved` | "Praegodkendt" | "Pre-approved" |
+| `leader.deleteConfirm` | "Slet {name}?" | "Delete {name}?" |
+| `leader.deleted` | "{name} er slettet" | "{name} has been deleted" |
 
-## 3. Login Flow Changes (`src/pages/Login.tsx`)
-
-**New user registration:**
-- First user: status = `approved` (auto-approved, becomes leader)
-- All other new users: status = `pending_approval`
-- After creating profile, if status is `pending_approval`, show a waiting screen instead of navigating to the test
-
-**Existing user login:**
-- Fetch `status` from `profiles` table
-- If `pending_approval`, show the waiting message
-- If `approved`, proceed as normal
-
-**Waiting screen:**
-- Show a friendly card with: "Tak for din tilmelding, [Navn]. En leder skal godkende din adgang, for du kan tage DISC-testen."
-- Include a "Check status" / refresh button and a logout button
-
-## 4. Employee Dashboard Guard (`src/pages/EmployeeDashboard.tsx`)
-
-- Add status check: if `user.status !== 'approved'`, redirect to `/pending` (or show inline waiting view)
-- This prevents direct URL access to the test
-
-## 5. New Pending Page (`src/pages/PendingApproval.tsx`)
-
-A simple page showing the waiting message with:
-- Polygon logo and branding
-- Friendly message explaining approval is needed
-- "Check again" button that re-fetches status from the database
-- Logout button
-- If status changes to `approved`, auto-redirect to `/disc-test`
-
-## 6. Leader Dashboard Changes (`src/pages/LeaderDashboard.tsx`)
-
-Add a new "Afventende godkendelser" section at the top of `<main>`, before the response rate card:
-
-- Fetch profiles where `status = 'pending_approval'`
-- Display as a Card with an alert/notification style
-- Each pending user shown as a row with name + two buttons:
-  - "Godkend" -- updates `profiles.status` to `approved`
-  - "Afvis" -- deletes the profile row + associated `user_roles` row
-- Section only shows when there are pending users
-- After action, refresh the list
-
-## 7. Route Update (`src/App.tsx`)
-
-Add `/pending` route pointing to `PendingApproval` page.
-
-## 8. Translation Updates (all 9 files)
-
-New keys:
-```typescript
-approval: {
-  pendingTitle: "Afventer godkendelse",
-  pendingMessage: "Tak for din tilmelding, {name}. En leder skal godkende din adgang, før du kan tage DISC-testen. Du modtager besked her på siden, når du er godkendt.",
-  checkStatus: "Tjek status",
-  pendingApprovals: "Afventende godkendelser",
-  approve: "Godkend",
-  reject: "Afvis",
-  approved: "Godkendt",
-  rejected: "Afvist",
-  approvedMessage: "{name} er nu godkendt.",
-  rejectedMessage: "{name} er blevet afvist.",
-  noPending: "Ingen afventende godkendelser.",
-}
-```
-
-## Files
+## Files to modify
 
 | File | Change |
 |------|--------|
-| **Database migration** | Add `status` column to `profiles`, update existing rows, add UPDATE/DELETE policies |
-| `src/lib/auth-context.tsx` | Add `status` to User interface |
-| `src/pages/PendingApproval.tsx` | **New file** -- waiting screen |
-| `src/pages/Login.tsx` | Set status on registration, check status on login, redirect pending users |
-| `src/pages/EmployeeDashboard.tsx` | Guard against unapproved users |
-| `src/pages/LeaderDashboard.tsx` | Add pending approvals section |
-| `src/App.tsx` | Add `/pending` route |
-| `src/lib/translations/da.ts` | Add `approval` keys |
-| `src/lib/translations/en.ts` | Add `approval` keys |
-| `src/lib/translations/de.ts` | Add `approval` keys |
-| `src/lib/translations/es.ts` | Add `approval` keys |
-| `src/lib/translations/fr.ts` | Add `approval` keys |
-| `src/lib/translations/nl.ts` | Add `approval` keys |
-| `src/lib/translations/sv.ts` | Add `approval` keys |
-| `src/lib/translations/no.ts` | Add `approval` keys |
-| `src/lib/translations/fi.ts` | Add `approval` keys |
+| `src/pages/LeaderDashboard.tsx` | Add pre-approve section, delete button, pre-approved badge |
+| `src/lib/translations/da.ts` | Add whitelist keys |
+| `src/lib/translations/en.ts` | Add whitelist keys |
+| `src/lib/translations/de.ts` | Add whitelist keys |
+| `src/lib/translations/es.ts` | Add whitelist keys |
+| `src/lib/translations/fr.ts` | Add whitelist keys |
+| `src/lib/translations/nl.ts` | Add whitelist keys |
+| `src/lib/translations/sv.ts` | Add whitelist keys |
+| `src/lib/translations/no.ts` | Add whitelist keys |
+| `src/lib/translations/fi.ts` | Add whitelist keys |
+
+No database changes needed -- existing `profiles` and `user_roles` tables support this already.
 
 ## Technical Details
 
-### Login logic change
+### Pre-approve logic
 ```typescript
-// New user
-const status = isFirst ? "approved" : "pending_approval";
-const profile = await supabase.from("profiles").insert({ full_name, status }).select("id").single();
-
-// Set user in context with status
-setUser({ id, full_name, role, status });
-
-// Navigation
-if (status === "pending_approval") navigate("/pending");
-else navigate(role === "leader" ? "/dashboard" : "/disc-test");
+const handlePreApprove = async (names: string[]) => {
+  let added = 0;
+  for (const name of names) {
+    const trimmed = name.trim();
+    if (!trimmed) continue;
+    
+    // Check if already exists
+    const { data: existing } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("full_name", trimmed)
+      .maybeSingle();
+    
+    if (existing) {
+      toast({ description: t.leader.preApproveExists.replace("{name}", trimmed) });
+      continue;
+    }
+    
+    // Create approved profile + employee role
+    const { data: newProfile } = await supabase
+      .from("profiles")
+      .insert({ full_name: trimmed, status: "approved" } as any)
+      .select("id")
+      .single();
+    
+    if (newProfile) {
+      await supabase.from("user_roles").insert({
+        user_id: newProfile.id,
+        role: "employee",
+      });
+      added++;
+    }
+  }
+  // Show success toast with count, refresh team list
+};
 ```
 
-### Leader approve/reject
+### Delete pre-approved user
 ```typescript
-// Approve
-await supabase.from("profiles").update({ status: "approved" }).eq("id", userId);
-
-// Reject
-await supabase.from("user_roles").delete().eq("user_id", userId);
-await supabase.from("profiles").delete().eq("id", userId);
+const handleDeleteMember = async (member: TeamMember) => {
+  await supabase.from("user_roles").delete().eq("user_id", member.id);
+  await supabase.from("profiles").delete().eq("id", member.id);
+  toast({ title: t.leader.deleted.replace("{name}", member.full_name) });
+  fetchTeam();
+};
 ```
 
-### Pending page auto-check
-The pending page will have a "Check status" button that re-queries the profile status. If approved, it updates the auth context and redirects.
+### Status badge in team table
+```typescript
+// In the Status column cell:
+{member.primary_style ? (
+  isStale ? (
+    <Badge>/* amber stale badge */</Badge>
+  ) : (
+    <Badge>/* green current badge */</Badge>
+  )
+) : (
+  <Badge className="border-blue-400 bg-blue-50 text-blue-700">
+    {t.leader.statusPreApproved}
+  </Badge>
+)}
+```
 
