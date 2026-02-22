@@ -47,13 +47,13 @@ export const nl: typeof da = {
     },
   },
   teamOverview: {
-    title: "Teamoverzicht",
+    title: "Overzicht",
     subtitle: "DISC-verdeling in je team",
     noResults: "Nog geen medewerkers hebben de test afgerond.",
     topTraits: "Belangrijkste eigenschappen",
   },
   teamAnalyzer: {
-    title: "Teamanalysator",
+    title: "Analysator",
     subtitle: "Analyseer de DISC-balans in een geselecteerde groep",
     selectEmployees: "Selecteer medewerkers (2-5)",
     selected: "{count} van 5 geselecteerd",
