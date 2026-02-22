@@ -437,7 +437,7 @@ const LeaderDashboard = () => {
                             onClick={() => handleDeleteMember(member)}
                           >
                             <Trash2 className="mr-1 h-3 w-3" />
-                            <span className="hidden sm:inline">{t.approval.reject}</span>
+                            <span className="hidden sm:inline">{t.common.deleteLabel}</span>
                           </Button>
                         )}
                       </TableCell>
