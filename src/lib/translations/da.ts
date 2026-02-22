@@ -314,4 +314,17 @@ export const da = {
     becauseCommunication: "har den bedste profil til at kommunikere og engagere gruppen.",
     becausePlanning: "har den bedste profil til at strukturere og planlægge opgaver.",
   },
+  approval: {
+    pendingTitle: "Afventer godkendelse",
+    pendingMessage: "Tak for din tilmelding, {name}. En leder skal godkende din adgang, før du kan tage DISC-testen. Du modtager besked her på siden, når du er godkendt.",
+    checkStatus: "Tjek status",
+    pendingApprovals: "Afventende godkendelser",
+    approve: "Godkend",
+    reject: "Afvis",
+    approved: "Godkendt",
+    rejected: "Afvist",
+    approvedMessage: "{name} er nu godkendt.",
+    rejectedMessage: "{name} er blevet afvist.",
+    noPending: "Ingen afventende godkendelser.",
+  },
 };

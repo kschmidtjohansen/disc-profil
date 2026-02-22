@@ -292,4 +292,17 @@ export const en: typeof da = {
     becauseCommunication: "has the best profile to communicate and engage the group.",
     becausePlanning: "has the best profile to structure and plan tasks.",
   },
+  approval: {
+    pendingTitle: "Awaiting approval",
+    pendingMessage: "Thank you for registering, {name}. A leader must approve your access before you can take the DISC test. You will be notified on this page when approved.",
+    checkStatus: "Check status",
+    pendingApprovals: "Pending approvals",
+    approve: "Approve",
+    reject: "Reject",
+    approved: "Approved",
+    rejected: "Rejected",
+    approvedMessage: "{name} has been approved.",
+    rejectedMessage: "{name} has been rejected.",
+    noPending: "No pending approvals.",
+  },
 };

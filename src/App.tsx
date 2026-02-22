@@ -11,6 +11,7 @@ import LeaderDashboard from "./pages/LeaderDashboard";
 import TeamOverview from "./pages/TeamOverview";
 import TeamAnalyzer from "./pages/TeamAnalyzer";
 import NotFound from "./pages/NotFound";
+import PendingApproval from "./pages/PendingApproval";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Login />} />
+              <Route path="/pending" element={<PendingApproval />} />
               <Route path="/disc-test" element={<EmployeeDashboard />} />
               <Route path="/dashboard" element={<LeaderDashboard />} />
               <Route path="/team-overview" element={<TeamOverview />} />

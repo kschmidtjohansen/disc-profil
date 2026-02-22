@@ -34,6 +34,7 @@ const LeaderDashboard = () => {
   const { toast } = useToast();
   const { t, lang, setLang } = useTranslation();
   const [team, setTeam] = useState<TeamMember[]>([]);
+  const [pendingUsers, setPendingUsers] = useState<{ id: string; full_name: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
   const reportRef = useRef<HTMLDivElement>(null);
@@ -51,10 +52,31 @@ const LeaderDashboard = () => {
       return;
     }
     fetchTeam();
+    fetchPending();
   }, [user, navigate]);
 
+  const fetchPending = async () => {
+    const { data } = await supabase.from("profiles").select("id, full_name, status").eq("status", "pending_approval");
+    setPendingUsers(data ?? []);
+  };
+
+  const handleApprove = async (userId: string, name: string) => {
+    await supabase.from("profiles").update({ status: "approved" } as any).eq("id", userId);
+    toast({ title: t.approval.approved, description: t.approval.approvedMessage.replace("{name}", name) });
+    fetchPending();
+    fetchTeam();
+  };
+
+  const handleReject = async (userId: string, name: string) => {
+    await supabase.from("user_roles").delete().eq("user_id", userId);
+    await supabase.from("profiles").delete().eq("id", userId);
+    toast({ title: t.approval.rejected, description: t.approval.rejectedMessage.replace("{name}", name) });
+    fetchPending();
+    fetchTeam();
+  };
+
   const fetchTeam = async () => {
-    const { data: profiles } = await supabase.from("profiles").select("id, full_name");
+    const { data: profiles } = await supabase.from("profiles").select("id, full_name, status").eq("status", "approved");
     const { data: roles } = await supabase.from("user_roles").select("user_id, role");
     const { data: results } = await supabase.from("disc_results").select("user_id, primary_style, answers, completed_at");
 
@@ -102,7 +124,7 @@ const LeaderDashboard = () => {
       description: t.leader.roleUpdatedDesc.replace("{name}", member.full_name).replace("{role}", roleLabel),
     });
     if (member.id === user?.id) {
-      setUser({ ...user!, role: newRole });
+      setUser({ ...user!, role: newRole, status: user!.status ?? "approved" });
       if (newRole === "employee") navigate("/disc-test");
     }
     fetchTeam();
@@ -222,6 +244,31 @@ const LeaderDashboard = () => {
       </header>
 
       <main className="max-w-5xl mx-auto p-4 sm:p-6 space-y-8 mt-4">
+        {pendingUsers.length > 0 && (
+          <Card className="border-0 shadow-lg rounded-xl border-l-4 border-l-amber-400">
+            <CardHeader className="flex flex-row items-center gap-3 pb-2">
+              <Users className="h-5 w-5 text-amber-500" />
+              <CardTitle className="text-lg">{t.approval.pendingApprovals}</CardTitle>
+              <Badge variant="secondary" className="ml-auto">{pendingUsers.length}</Badge>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {pendingUsers.map((pu) => (
+                <div key={pu.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
+                  <span className="font-medium">{pu.full_name}</span>
+                  <div className="flex gap-2">
+                    <Button size="sm" className="rounded-xl" onClick={() => handleApprove(pu.id, pu.full_name)}>
+                      {t.approval.approve}
+                    </Button>
+                    <Button size="sm" variant="destructive" className="rounded-xl" onClick={() => handleReject(pu.id, pu.full_name)}>
+                      {t.approval.reject}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="border-0 shadow-lg rounded-xl">
           <CardHeader className="flex flex-row items-center gap-3 pb-2">
             <Users className="h-5 w-5 text-primary" />

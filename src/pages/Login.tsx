@@ -33,8 +33,18 @@ const Login = () => {
 
       let profileId: string;
 
+      let status: "pending_approval" | "approved";
+
       if (existing) {
         profileId = existing.id;
+
+        // Fetch existing status
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("status")
+          .eq("id", profileId)
+          .maybeSingle();
+        status = (profileData?.status as "pending_approval" | "approved") ?? "pending_approval";
 
         const { data: existingRole } = await supabase
           .from("user_roles")
@@ -53,10 +63,11 @@ const Login = () => {
       } else {
         const { data: countData } = await supabase.rpc("get_user_count");
         const isFirst = (countData ?? 0) === 0;
+        status = isFirst ? "approved" : "pending_approval";
 
         const { data: newProfile, error: profileError } = await supabase
           .from("profiles")
-          .insert({ full_name: trimmed })
+          .insert({ full_name: trimmed, status } as any)
           .select("id")
           .single();
 
@@ -77,8 +88,13 @@ const Login = () => {
 
       const role = roleData?.role ?? "employee";
 
-      setUser({ id: profileId, full_name: trimmed, role });
-      navigate(role === "leader" ? "/dashboard" : "/disc-test");
+      setUser({ id: profileId, full_name: trimmed, role, status });
+
+      if (status === "pending_approval") {
+        navigate("/pending");
+      } else {
+        navigate(role === "leader" ? "/dashboard" : "/disc-test");
+      }
     } catch (err) {
       toast({
         title: t.common.error,

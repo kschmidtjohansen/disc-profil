@@ -199,4 +199,17 @@ export const de: typeof da = {
     becauseCommunication: "hat das beste Profil, um zu kommunizieren und die Gruppe zu engagieren.",
     becausePlanning: "hat das beste Profil, um Aufgaben zu strukturieren und zu planen.",
   },
+  approval: {
+    pendingTitle: "Warten auf Genehmigung",
+    pendingMessage: "Vielen Dank für Ihre Anmeldung, {name}. Ein Vorgesetzter muss Ihren Zugang genehmigen, bevor Sie den DISC-Test machen können. Sie werden auf dieser Seite benachrichtigt, wenn Sie genehmigt sind.",
+    checkStatus: "Status prüfen",
+    pendingApprovals: "Ausstehende Genehmigungen",
+    approve: "Genehmigen",
+    reject: "Ablehnen",
+    approved: "Genehmigt",
+    rejected: "Abgelehnt",
+    approvedMessage: "{name} wurde genehmigt.",
+    rejectedMessage: "{name} wurde abgelehnt.",
+    noPending: "Keine ausstehenden Genehmigungen.",
+  },
 };

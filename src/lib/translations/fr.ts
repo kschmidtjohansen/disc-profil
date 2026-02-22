@@ -197,4 +197,17 @@ export const fr: typeof da = {
     becauseCommunication: "a le meilleur profil pour communiquer et engager le groupe.",
     becausePlanning: "a le meilleur profil pour structurer et planifier les tâches.",
   },
+  approval: {
+    pendingTitle: "En attente d'approbation",
+    pendingMessage: "Merci pour votre inscription, {name}. Un leader doit approuver votre accès avant que vous puissiez passer le test DISC. Vous serez notifié sur cette page une fois approuvé.",
+    checkStatus: "Vérifier le statut",
+    pendingApprovals: "Approbations en attente",
+    approve: "Approuver",
+    reject: "Rejeter",
+    approved: "Approuvé",
+    rejected: "Rejeté",
+    approvedMessage: "{name} a été approuvé.",
+    rejectedMessage: "{name} a été rejeté.",
+    noPending: "Aucune approbation en attente.",
+  },
 };

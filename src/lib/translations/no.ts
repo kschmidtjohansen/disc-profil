@@ -77,4 +77,17 @@ export const no: typeof da = {
     becauseCommunication: "har den beste profilen til å kommunisere og engasjere gruppen.",
     becausePlanning: "har den beste profilen til å strukturere og planlegge oppgaver.",
   },
+  approval: {
+    pendingTitle: "Venter på godkjenning",
+    pendingMessage: "Takk for registreringen, {name}. En leder må godkjenne tilgangen din før du kan ta DISC-testen. Du vil bli varslet på denne siden når du er godkjent.",
+    checkStatus: "Sjekk status",
+    pendingApprovals: "Ventende godkjenninger",
+    approve: "Godkjenn",
+    reject: "Avvis",
+    approved: "Godkjent",
+    rejected: "Avvist",
+    approvedMessage: "{name} er godkjent.",
+    rejectedMessage: "{name} er avvist.",
+    noPending: "Ingen ventende godkjenninger.",
+  },
 };
