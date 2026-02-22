@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell, ResponsiveContainer } from "recharts";
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
 import { useTranslation } from "@/lib/i18n";
 import polygonLogo from "@/assets/polygon-logo.svg";
 
@@ -23,11 +23,11 @@ const DiscReportTemplate = forwardRef<HTMLDivElement, DiscReportTemplateProps>(
     const desc = t.disc.descriptions[style as keyof typeof t.disc.descriptions];
     const report = t.disc.reportData[style as keyof typeof t.disc.reportData];
     const chartLabels = t.report.chartLabels;
-    const chartData = [
-      { name: "D", score: scores.D, label: chartLabels.D },
-      { name: "I", score: scores.I, label: chartLabels.I },
-      { name: "S", score: scores.S, label: chartLabels.S },
-      { name: "C", score: scores.C, label: chartLabels.C },
+    const radarData = [
+      { trait: chartLabels.D, score: scores.D },
+      { trait: chartLabels.I, score: scores.I },
+      { trait: chartLabels.S, score: scores.S },
+      { trait: chartLabels.C, score: scores.C },
     ];
     const date = new Date().toLocaleDateString("da-DK", { day: "numeric", month: "long", year: "numeric" });
 
@@ -48,18 +48,14 @@ const DiscReportTemplate = forwardRef<HTMLDivElement, DiscReportTemplateProps>(
 
           <div style={{ marginBottom: 32 }}>
             <h2 style={{ fontSize: 16, fontWeight: 600, color: "#2d3748", marginBottom: 12 }}>{t.report.scoreDistribution}</h2>
-            <div style={{ width: 680, height: 220 }}>
+            <div style={{ width: 400, height: 300, margin: "0 auto" }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#4a5568" }} />
-                  <YAxis domain={[0, 5]} ticks={[0, 1, 2, 3, 4, 5]} tick={{ fontSize: 12, fill: "#4a5568" }} />
-                  <Bar dataKey="score" radius={[6, 6, 0, 0]} barSize={60}>
-                    {chartData.map((entry) => (
-                      <Cell key={entry.name} fill={COLORS[entry.name]} />
-                    ))}
-                  </Bar>
-                </BarChart>
+                <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
+                  <PolarGrid stroke="#e2e8f0" />
+                  <PolarAngleAxis dataKey="trait" tick={{ fontSize: 13, fill: "#4a5568", fontWeight: 600 }} />
+                  <PolarRadiusAxis domain={[0, Math.max(...Object.values(scores), 5)]} tick={{ fontSize: 10, fill: "#a0aec0" }} />
+                  <Radar name="DiSC" dataKey="score" stroke={COLORS[style]} fill={COLORS[style]} fillOpacity={0.3} strokeWidth={2} />
+                </RadarChart>
               </ResponsiveContainer>
             </div>
           </div>
