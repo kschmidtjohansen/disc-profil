@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import polygonLogo from "@/assets/polygon-logo.svg";
 
 const Login = () => {
   const [name, setName] = useState("");
@@ -20,7 +21,6 @@ const Login = () => {
 
     setLoading(true);
     try {
-      // Check if profile exists
       const { data: existing } = await supabase
         .from("profiles")
         .select("id, full_name")
@@ -32,11 +32,9 @@ const Login = () => {
       if (existing) {
         profileId = existing.id;
       } else {
-        // Check if first user
         const { data: countData } = await supabase.rpc("get_user_count");
         const isFirst = (countData ?? 0) === 0;
 
-        // Create profile
         const { data: newProfile, error: profileError } = await supabase
           .from("profiles")
           .insert({ full_name: trimmed })
@@ -46,14 +44,12 @@ const Login = () => {
         if (profileError || !newProfile) throw profileError;
         profileId = newProfile.id;
 
-        // Assign role
         await supabase.from("user_roles").insert({
           user_id: profileId,
           role: isFirst ? "leader" : "employee",
         });
       }
 
-      // Fetch role
       const { data: roleData } = await supabase
         .from("user_roles")
         .select("role")
@@ -77,10 +73,10 @@ const Login = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-primary p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0">
+      <Card className="w-full max-w-md shadow-2xl border-0 rounded-xl">
         <CardHeader className="text-center space-y-3 pb-2">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mb-2">
-            <span className="text-primary-foreground text-2xl font-bold">D</span>
+          <div className="mx-auto mb-2">
+            <img src={polygonLogo} alt="Polygon Group" className="h-12 mx-auto" />
           </div>
           <CardTitle className="text-3xl">DiSC Profilering</CardTitle>
           <CardDescription className="text-base">
@@ -93,13 +89,13 @@ const Login = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-            className="h-12 text-base"
+            className="h-12 text-base rounded-xl"
             autoFocus
           />
           <Button
             onClick={handleLogin}
             disabled={!name.trim() || loading}
-            className="w-full h-12 text-base font-semibold"
+            className="w-full h-12 text-base font-semibold rounded-xl"
           >
             {loading ? "Logger ind..." : "Log ind"}
           </Button>
