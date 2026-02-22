@@ -41,7 +41,7 @@ const TeamOverview = () => {
 
   useEffect(() => {
     if (!user) { navigate("/"); return; }
-    if (user.role !== "leader") {
+    if (user.status !== "approved" || user.role !== "leader") {
       toast({ title: t.common.accessDenied, description: t.common.leaderOnly });
       navigate("/disc-test");
       return;
