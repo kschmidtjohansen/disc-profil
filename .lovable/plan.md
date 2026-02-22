@@ -1,135 +1,167 @@
 
 
-# Team Analysator -- Ny side til ledere
+# User Approval Workflow
 
-## Overblik
-En ny side paa `/team-analyzer` hvor ledere kan vaelge 2-5 medarbejdere, klikke "Analyser", og faa en visuel opsummering af gruppens DISC-balance, styrker, huller og anbefalinger.
+## Overview
+Add an approval system so new users must be approved by a leader before accessing the DISC test. The first user (who becomes leader) is auto-approved. All subsequent users start as `pending_approval`.
 
-## Ny fil: `src/pages/TeamAnalyzer.tsx`
+## 1. Database Changes
 
-### Layout
-- Samme header med NavDropdown, LanguageDropdown og logo som de andre leader-sider
-- Adgangskontrol: kun ledere (redirect til `/disc-test` ellers)
+### Add `status` column to `profiles` table
+A new column `status` of type `text` with default `'pending_approval'`. Possible values: `pending_approval`, `approved`.
 
-### Funktionalitet
+```sql
+ALTER TABLE public.profiles ADD COLUMN status text NOT NULL DEFAULT 'pending_approval';
+-- Set all existing profiles to approved (they already have access)
+UPDATE public.profiles SET status = 'approved';
+```
 
-**1. Multi-select af medarbejdere**
-- Hent alle medarbejdere med gennemfoert DISC-test fra `profiles` + `disc_results`
-- Vis en liste med checkboxes (brug eksisterende `Checkbox` komponent)
-- Minimum 2, maksimum 5 valgte -- "Analyser"-knappen er disabled uden for dette interval
-- Vis en taeller: "2 af 5 valgt"
+### Add RLS policy for profile updates (leaders can approve)
+```sql
+CREATE POLICY "Anyone can update profiles"
+ON public.profiles FOR UPDATE
+USING (true)
+WITH CHECK (true);
+```
 
-**2. Analyse-visning (vises efter klik paa "Analyser")**
+### Add RLS policy for deleting profiles (leaders can reject)
+```sql
+CREATE POLICY "Anyone can delete profiles"
+ON public.profiles FOR DELETE
+USING (true);
+```
 
-Beregn DISC-fordelingen for de valgte medarbejdere:
-- Taeller antal D, I, S og C typer i gruppen
-- Viser et simpelt visuelt overblik med farvede badges/bars
+Also need delete policies on `user_roles` and `disc_results` for cascade cleanup when rejecting a user:
+```sql
+CREATE POLICY "Anyone can delete user_roles"
+ON public.user_roles FOR DELETE
+USING (true);
+```
 
-**3. Styrker og huller**
-Genereret med simpel regelbaseret logik direkte i koden:
+## 2. Auth Context Update (`src/lib/auth-context.tsx`)
 
-| Condition | Styrke-tekst | Hul-tekst |
-|-----------|-------------|-----------|
-| Mange D'er | "Teamet er handlingsorienteret og resultatstyret" | - |
-| Ingen D | - | "I mangler en D-type til at drive beslutninger" |
-| Mange I'er | "Teamet har staerk kommunikation og kreativitet" | - |
-| Ingen I | - | "I mangler en I-type til at skabe engagement" |
-| Mange S'er | "Teamet er stabilt og paaalideligt" | - |
-| Ingen S | - | "I mangler en S-type til at sikre harmoni" |
-| Mange C'er | "Teamet har hoej kvalitet og praecision" | - |
-| Ingen C | - | "I mangler en C-type til at tjekke detaljer" |
-
-**4. Anbefalinger**
-Regelbaseret anbefaling baseret paa profilerne:
-- "Kommunikation": Foerst I-type, ellers D-type
-- "Planlaegging": Foerst C-type, ellers S-type
-
-Vises som kort med navn + begrundelse.
-
-## Navigations-opdatering
-
-Tilfoejer "Team Analysator" til `NavDropdown` i alle 4 sider:
-- `EmployeeDashboard.tsx`
-- `LeaderDashboard.tsx`
-- `TeamOverview.tsx`
-- `TeamAnalyzer.tsx` (ny)
-
-Ny route `/team-analyzer` i `App.tsx`.
-
-## Oversaettelser
-
-Nye noeger tilfojes til alle 9 oversaettelsesfiler:
-
+Add `status` field to User interface:
 ```typescript
-teamAnalyzer: {
-  title: "Team Analysator",
-  subtitle: "Analyser DISC-balancen i en udvalgt gruppe",
-  selectEmployees: "Vælg medarbejdere (2-5)",
-  selected: "{count} af 5 valgt",
-  analyze: "Analyser",
-  strengths: "Styrker",
-  gaps: "Potentielle huller",
-  recommendations: "Anbefalinger",
-  communicationLead: "Bør lede kommunikationen",
-  planningLead: "Bør håndtere planlægningen",
-  noCompleted: "Ingen medarbejdere har gennemført testen endnu.",
-  minSelect: "Vælg mindst 2 medarbejdere",
-  balance: "DISC-fordeling",
-  strongD: "Teamet er handlingsorienteret og resultatstyret.",
-  strongI: "Teamet har stærk kommunikation og kreativitet.",
-  strongS: "Teamet er stabilt og pålideligt.",
-  strongC: "Teamet har høj kvalitet og præcision.",
-  gapD: "I mangler en D-type til at drive beslutninger.",
-  gapI: "I mangler en I-type til at skabe engagement.",
-  gapS: "I mangler en S-type til at sikre harmoni og stabilitet.",
-  gapC: "I mangler en C-type til at tjekke detaljer og kvalitet.",
-  becauseCommunication: "har den bedste profil til at kommunikere og engagere gruppen.",
-  becausePlanning: "har den bedste profil til at strukturere og planlægge opgaver.",
+interface User {
+  id: string;
+  full_name: string;
+  role: "employee" | "leader";
+  status: "pending_approval" | "approved";
 }
 ```
 
-## Filer der aendres
+## 3. Login Flow Changes (`src/pages/Login.tsx`)
 
-| Fil | Aendring |
-|-----|--------|
-| `src/pages/TeamAnalyzer.tsx` | **Ny fil** -- hele Team Analysator-siden |
-| `src/App.tsx` | Tilfoej `/team-analyzer` route |
-| `src/pages/EmployeeDashboard.tsx` | Tilfoej nav-link til Team Analysator |
-| `src/pages/LeaderDashboard.tsx` | Tilfoej nav-link til Team Analysator |
-| `src/pages/TeamOverview.tsx` | Tilfoej nav-link til Team Analysator |
-| `src/lib/translations/da.ts` | Tilfoej `teamAnalyzer` noeger |
-| `src/lib/translations/en.ts` | Tilfoej `teamAnalyzer` noeger (engelsk) |
-| `src/lib/translations/de.ts` | Tilfoej `teamAnalyzer` noeger (tysk) |
-| `src/lib/translations/es.ts` | Tilfoej `teamAnalyzer` noeger (spansk) |
-| `src/lib/translations/fr.ts` | Tilfoej `teamAnalyzer` noeger (fransk) |
-| `src/lib/translations/nl.ts` | Tilfoej `teamAnalyzer` noeger (hollandsk) |
-| `src/lib/translations/sv.ts` | Tilfoej `teamAnalyzer` noeger (svensk) |
-| `src/lib/translations/no.ts` | Tilfoej `teamAnalyzer` noeger (norsk) |
-| `src/lib/translations/fi.ts` | Tilfoej `teamAnalyzer` noeger (finsk) |
+**New user registration:**
+- First user: status = `approved` (auto-approved, becomes leader)
+- All other new users: status = `pending_approval`
+- After creating profile, if status is `pending_approval`, show a waiting screen instead of navigating to the test
 
-## Tekniske detaljer
+**Existing user login:**
+- Fetch `status` from `profiles` table
+- If `pending_approval`, show the waiting message
+- If `approved`, proceed as normal
 
-### Analyse-logik (ren frontend, ingen AI)
+**Waiting screen:**
+- Show a friendly card with: "Tak for din tilmelding, [Navn]. En leder skal godkende din adgang, for du kan tage DISC-testen."
+- Include a "Check status" / refresh button and a logout button
+
+## 4. Employee Dashboard Guard (`src/pages/EmployeeDashboard.tsx`)
+
+- Add status check: if `user.status !== 'approved'`, redirect to `/pending` (or show inline waiting view)
+- This prevents direct URL access to the test
+
+## 5. New Pending Page (`src/pages/PendingApproval.tsx`)
+
+A simple page showing the waiting message with:
+- Polygon logo and branding
+- Friendly message explaining approval is needed
+- "Check again" button that re-fetches status from the database
+- Logout button
+- If status changes to `approved`, auto-redirect to `/disc-test`
+
+## 6. Leader Dashboard Changes (`src/pages/LeaderDashboard.tsx`)
+
+Add a new "Afventende godkendelser" section at the top of `<main>`, before the response rate card:
+
+- Fetch profiles where `status = 'pending_approval'`
+- Display as a Card with an alert/notification style
+- Each pending user shown as a row with name + two buttons:
+  - "Godkend" -- updates `profiles.status` to `approved`
+  - "Afvis" -- deletes the profile row + associated `user_roles` row
+- Section only shows when there are pending users
+- After action, refresh the list
+
+## 7. Route Update (`src/App.tsx`)
+
+Add `/pending` route pointing to `PendingApproval` page.
+
+## 8. Translation Updates (all 9 files)
+
+New keys:
 ```typescript
-// Taeller typer
-const counts = { D: 0, I: 0, S: 0, C: 0 };
-selected.forEach(m => {
-  const style = m.primary_style.split("/")[0];
-  counts[style]++;
-});
-
-// Styrker: typer med >= 2 medlemmer
-// Huller: typer med 0 medlemmer
-// Kommunikation: foerste I-type, fallback D-type
-// Planlaegging: foerste C-type, fallback S-type
+approval: {
+  pendingTitle: "Afventer godkendelse",
+  pendingMessage: "Tak for din tilmelding, {name}. En leder skal godkende din adgang, før du kan tage DISC-testen. Du modtager besked her på siden, når du er godkendt.",
+  checkStatus: "Tjek status",
+  pendingApprovals: "Afventende godkendelser",
+  approve: "Godkend",
+  reject: "Afvis",
+  approved: "Godkendt",
+  rejected: "Afvist",
+  approvedMessage: "{name} er nu godkendt.",
+  rejectedMessage: "{name} er blevet afvist.",
+  noPending: "Ingen afventende godkendelser.",
+}
 ```
 
-### UI-komponenter
-- `Checkbox` til multi-select
-- `Card` til resultatkort (balance, styrker, huller, anbefalinger)
-- `Badge` til DISC-type labels
-- `Progress`-lignende farvede bars til at vise DISC-fordelingen visuelt
-- `Button` til "Analyser"
+## Files
 
-Ingen database-aendringer er noedvendige -- alt data hentes fra eksisterende tabeller.
+| File | Change |
+|------|--------|
+| **Database migration** | Add `status` column to `profiles`, update existing rows, add UPDATE/DELETE policies |
+| `src/lib/auth-context.tsx` | Add `status` to User interface |
+| `src/pages/PendingApproval.tsx` | **New file** -- waiting screen |
+| `src/pages/Login.tsx` | Set status on registration, check status on login, redirect pending users |
+| `src/pages/EmployeeDashboard.tsx` | Guard against unapproved users |
+| `src/pages/LeaderDashboard.tsx` | Add pending approvals section |
+| `src/App.tsx` | Add `/pending` route |
+| `src/lib/translations/da.ts` | Add `approval` keys |
+| `src/lib/translations/en.ts` | Add `approval` keys |
+| `src/lib/translations/de.ts` | Add `approval` keys |
+| `src/lib/translations/es.ts` | Add `approval` keys |
+| `src/lib/translations/fr.ts` | Add `approval` keys |
+| `src/lib/translations/nl.ts` | Add `approval` keys |
+| `src/lib/translations/sv.ts` | Add `approval` keys |
+| `src/lib/translations/no.ts` | Add `approval` keys |
+| `src/lib/translations/fi.ts` | Add `approval` keys |
+
+## Technical Details
+
+### Login logic change
+```typescript
+// New user
+const status = isFirst ? "approved" : "pending_approval";
+const profile = await supabase.from("profiles").insert({ full_name, status }).select("id").single();
+
+// Set user in context with status
+setUser({ id, full_name, role, status });
+
+// Navigation
+if (status === "pending_approval") navigate("/pending");
+else navigate(role === "leader" ? "/dashboard" : "/disc-test");
+```
+
+### Leader approve/reject
+```typescript
+// Approve
+await supabase.from("profiles").update({ status: "approved" }).eq("id", userId);
+
+// Reject
+await supabase.from("user_roles").delete().eq("user_id", userId);
+await supabase.from("profiles").delete().eq("id", userId);
+```
+
+### Pending page auto-check
+The pending page will have a "Check status" button that re-queries the profile status. If approved, it updates the auth context and redirects.
 
