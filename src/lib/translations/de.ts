@@ -2,7 +2,7 @@ import type { da } from "./da";
 
 export const de: typeof da = {
   common: {
-    login: "Anmelden", logout: "Abmelden", loading: "Wird geladen...", employee: "Mitarbeiter", leader: "Führungskraft", discProfile: "DISC Profil", accessDenied: "Zugang verweigert", leaderOnly: "Nur Führungskräfte haben Zugang zu dieser Seite.", error: "Fehler", somethingWentWrong: "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+    login: "Anmelden", logout: "Abmelden", loading: "Wird geladen...", employee: "Mitarbeiter", leader: "Führungskraft", discProfile: "DISC Profil", accessDenied: "Zugang verweigert", leaderOnly: "Nur Führungskräfte haben Zugang zu dieser Seite.", error: "Fehler", somethingWentWrong: "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.", pageNotFound: "Seite nicht gefunden", returnHome: "Zurück zur Startseite", deleteLabel: "Löschen",
   },
   login: { title: "DISC Profil", subtitle: "Geben Sie Ihren vollständigen Namen ein, um sich anzumelden oder ein Profil zu erstellen", placeholder: "Vollständigen Namen eingeben", button: "Anmelden", buttonLoading: "Anmeldung läuft..." },
   test: { questionOf: "Frage {current} von {total}", chooseAnswer: "Wählen Sie die Antwort, die am besten zu Ihnen passt", back: "Zurück", next: "Weiter", submit: "Antworten absenden", welcome: "Willkommen, {name}!", welcomeDescription: "Sie haben Ihr DISC-Profil noch nicht ausgefüllt. Klicken Sie unten, um zu beginnen.", startTest: "DISC Profil starten", profileCompleted: "Profil abgeschlossen", keyTraits: "Ihre Schlüsseleigenschaften", refreshBanner: "Zeit für eine Auffrischung?", refreshDescription: "Ihr DISC-Profil ist über 6 Monate alt. Erwägen Sie, den Test erneut zu machen." },

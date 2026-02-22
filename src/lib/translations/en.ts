@@ -12,6 +12,9 @@ export const en: typeof da = {
     leaderOnly: "Only leaders have access to this page.",
     error: "Error",
     somethingWentWrong: "Something went wrong. Please try again.",
+    pageNotFound: "Page not found",
+    returnHome: "Return to home",
+    deleteLabel: "Delete",
   },
   login: {
     title: "DISC Profile",

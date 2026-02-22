@@ -10,6 +10,9 @@ export const da = {
     leaderOnly: "Kun ledere har adgang til denne side.",
     error: "Fejl",
     somethingWentWrong: "Noget gik galt. Prøv igen.",
+    pageNotFound: "Siden blev ikke fundet",
+    returnHome: "Gå til forsiden",
+    deleteLabel: "Slet",
   },
   login: {
     title: "DISC Profil",
