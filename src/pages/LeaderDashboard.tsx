@@ -2,14 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
-import { discDescriptions } from "@/lib/disc-data";
+import { useTranslation, languages } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Download, ShieldCheck, Users, Loader2, ChevronDown, Check } from "lucide-react";
+import { LogOut, Download, ShieldCheck, Users, Loader2, ChevronDown, Check, Globe } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import polygonLogo from "@/assets/polygon-logo.svg";
 import DiscReportTemplate from "@/components/DiscReportTemplate";
@@ -30,6 +30,7 @@ const LeaderDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { t, lang, setLang } = useTranslation();
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
@@ -42,6 +43,11 @@ const LeaderDashboard = () => {
 
   useEffect(() => {
     if (!user) { navigate("/"); return; }
+    if (user.role !== "leader") {
+      toast({ title: t.common.accessDenied, description: t.common.leaderOnly });
+      navigate("/disc-test");
+      return;
+    }
     fetchTeam();
   }, [user, navigate]);
 
@@ -87,10 +93,14 @@ const LeaderDashboard = () => {
   const toggleRole = async (member: TeamMember) => {
     const newRole = member.role === "leader" ? "employee" : "leader";
     await supabase.from("user_roles").update({ role: newRole }).eq("user_id", member.id);
-    toast({ title: "Rolle opdateret", description: `${member.full_name} er nu ${newRole === "leader" ? "Leder" : "Medarbejder"}.` });
+    const roleLabel = newRole === "leader" ? t.common.leader : t.common.employee;
+    toast({
+      title: t.leader.roleUpdated,
+      description: t.leader.roleUpdatedDesc.replace("{name}", member.full_name).replace("{role}", roleLabel),
+    });
     if (member.id === user?.id) {
       setUser({ ...user!, role: newRole });
-      if (newRole === "employee") navigate("/employee");
+      if (newRole === "employee") navigate("/disc-test");
     }
     fetchTeam();
   };
@@ -118,11 +128,7 @@ const LeaderDashboard = () => {
 
       for (let i = 0; i < pages.length; i++) {
         const canvas = await html2canvas(pages[i] as HTMLElement, {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: "#ffffff",
-          width: 794,
-          height: 1123,
+          scale: 2, useCORS: true, backgroundColor: "#ffffff", width: 794, height: 1123,
         });
         const imgData = canvas.toDataURL("image/png");
         if (i > 0) pdf.addPage();
@@ -132,7 +138,7 @@ const LeaderDashboard = () => {
       pdf.save(`DiSC-rapport-${member.full_name.replace(/\s+/g, "-")}.pdf`);
     } catch (err) {
       console.error("PDF generation failed:", err);
-      toast({ title: "Fejl", description: "Kunne ikke generere PDF-rapport.", variant: "destructive" });
+      toast({ title: t.common.error, description: t.leader.pdfError, variant: "destructive" });
     } finally {
       setGeneratingId(null);
       setReportData(null);
@@ -141,25 +147,44 @@ const LeaderDashboard = () => {
 
   const handleLogout = () => { logout(); navigate("/"); };
 
-  if (loading) return <div className="flex min-h-screen items-center justify-center"><p>Indlæser...</p></div>;
+  if (loading) return <div className="flex min-h-screen items-center justify-center"><p>{t.common.loading}</p></div>;
 
   const NavDropdown = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-1 text-xl font-semibold text-primary-foreground hover:opacity-80 transition-opacity">
-          DISC Profil
+          {t.common.discProfile}
           <ChevronDown className="h-4 w-4" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="bg-popover">
-        <DropdownMenuItem onClick={() => navigate("/employee")} className="cursor-pointer">
-          {location.pathname === "/employee" && <Check className="mr-2 h-4 w-4" />}
-          <span className={location.pathname !== "/employee" ? "ml-6" : ""}>Medarbejder</span>
+        <DropdownMenuItem onClick={() => navigate("/disc-test")} className="cursor-pointer">
+          {location.pathname === "/disc-test" && <Check className="mr-2 h-4 w-4" />}
+          <span className={location.pathname !== "/disc-test" ? "ml-6" : ""}>{t.common.employee}</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/leader")} className="cursor-pointer">
-          {location.pathname === "/leader" && <Check className="mr-2 h-4 w-4" />}
-          <span className={location.pathname !== "/leader" ? "ml-6" : ""}>Leder</span>
+        <DropdownMenuItem onClick={() => navigate("/dashboard")} className="cursor-pointer">
+          {location.pathname === "/dashboard" && <Check className="mr-2 h-4 w-4" />}
+          <span className={location.pathname !== "/dashboard" ? "ml-6" : ""}>{t.common.leader}</span>
         </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  const LanguageDropdown = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex items-center gap-1.5 text-primary-foreground/80 hover:text-primary-foreground transition-colors text-sm">
+          <Globe className="h-4 w-4" />
+          {languages.find((l) => l.code === lang)?.label}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="bg-popover">
+        {languages.map((l) => (
+          <DropdownMenuItem key={l.code} onClick={() => setLang(l.code)} className="cursor-pointer">
+            {lang === l.code && <Check className="mr-2 h-4 w-4" />}
+            <span className={lang !== l.code ? "ml-6" : ""}>{l.label}</span>
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -172,9 +197,10 @@ const LeaderDashboard = () => {
           <NavDropdown />
         </div>
         <div className="flex items-center gap-3">
+          <LanguageDropdown />
           <span className="text-sm opacity-80">{user?.full_name}</span>
           <Button variant="ghost" onClick={handleLogout} className="text-primary-foreground hover:text-primary-foreground/80 hover:bg-primary/80">
-            <LogOut className="mr-2 h-4 w-4" /> Log ud
+            <LogOut className="mr-2 h-4 w-4" /> {t.common.logout}
           </Button>
         </div>
       </header>
@@ -183,11 +209,11 @@ const LeaderDashboard = () => {
         <Card className="border-0 shadow-lg rounded-xl">
           <CardHeader className="flex flex-row items-center gap-3 pb-2">
             <Users className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">Svarprocent</CardTitle>
+            <CardTitle className="text-lg">{t.leader.responseRate}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>{completedCount} af {TOTAL_EMPLOYEES} har gennemført</span>
+              <span>{t.leader.completedOf.replace("{completed}", String(completedCount)).replace("{total}", String(TOTAL_EMPLOYEES))}</span>
               <span className="font-semibold text-foreground">{percentage}%</span>
             </div>
             <Progress value={percentage} className="h-3" />
@@ -196,59 +222,61 @@ const LeaderDashboard = () => {
 
         <Card className="border-0 shadow-lg rounded-xl">
           <CardHeader>
-            <CardTitle className="text-lg">Teamoversigt</CardTitle>
+            <CardTitle className="text-lg">{t.leader.teamOverview}</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Navn</TableHead>
-                  <TableHead>Rolle</TableHead>
-                  <TableHead>DISC Profil</TableHead>
-                  <TableHead className="text-right">Handlinger</TableHead>
+                  <TableHead>{t.leader.name}</TableHead>
+                  <TableHead>{t.leader.role}</TableHead>
+                  <TableHead>{t.leader.discProfile}</TableHead>
+                  <TableHead className="text-right">{t.leader.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {team.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell className="font-medium">{member.full_name}</TableCell>
-                    <TableCell>
-                      <Badge variant={member.role === "leader" ? "default" : "secondary"}>
-                        {member.role === "leader" ? "Leder" : "Medarbejder"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {member.primary_style ? (
-                        <Badge variant="outline" className="font-semibold">
-                          {discDescriptions[member.primary_style]?.title ?? member.primary_style}
+                {team.map((member) => {
+                  const style = member.primary_style?.split("/")[0];
+                  const desc = style ? t.disc.descriptions[style as keyof typeof t.disc.descriptions] : null;
+                  return (
+                    <TableRow key={member.id}>
+                      <TableCell className="font-medium">{member.full_name}</TableCell>
+                      <TableCell>
+                        <Badge variant={member.role === "leader" ? "default" : "secondary"}>
+                          {member.role === "leader" ? t.common.leader : t.common.employee}
                         </Badge>
-                      ) : (
-                        <span className="text-muted-foreground text-sm">Afventer</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button variant="outline" size="sm" className="rounded-xl" onClick={() => toggleRole(member)}>
-                        <ShieldCheck className="mr-1 h-3 w-3" />
-                        {member.role === "leader" ? "Gør til medarbejder" : "Gør til leder"}
-                      </Button>
-                      {member.primary_style && member.answers && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="rounded-xl"
-                          onClick={() => downloadReport(member)}
-                          disabled={generatingId === member.id}
-                        >
-                          {generatingId === member.id ? (
-                            <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> Genererer...</>
-                          ) : (
-                            <><Download className="mr-1 h-3 w-3" /> Fuld Rapport</>
-                          )}
+                      </TableCell>
+                      <TableCell>
+                        {member.primary_style ? (
+                          <Badge variant="outline" className="font-semibold">
+                            {desc?.title ?? member.primary_style}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">{t.leader.pending}</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Button variant="outline" size="sm" className="rounded-xl" onClick={() => toggleRole(member)}>
+                          <ShieldCheck className="mr-1 h-3 w-3" />
+                          {member.role === "leader" ? t.leader.makeEmployee : t.leader.makeLeader}
                         </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                        {member.primary_style && member.answers && (
+                          <Button
+                            variant="outline" size="sm" className="rounded-xl"
+                            onClick={() => downloadReport(member)}
+                            disabled={generatingId === member.id}
+                          >
+                            {generatingId === member.id ? (
+                              <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> {t.leader.generating}</>
+                            ) : (
+                              <><Download className="mr-1 h-3 w-3" /> {t.leader.fullReport}</>
+                            )}
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </CardContent>
