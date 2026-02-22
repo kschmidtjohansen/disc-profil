@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { LogOut, Download, ShieldCheck, Users } from "lucide-react";
+import polygonLogo from "@/assets/polygon-logo.svg";
 
 const TOTAL_EMPLOYEES = 16;
 
@@ -59,7 +60,6 @@ const LeaderDashboard = () => {
     const newRole = member.role === "leader" ? "employee" : "leader";
     await supabase.from("user_roles").update({ role: newRole }).eq("user_id", member.id);
     toast({ title: "Rolle opdateret", description: `${member.full_name} er nu ${newRole === "leader" ? "Leder" : "Medarbejder"}.` });
-    // Update own role if toggling self
     if (member.id === user?.id) {
       setUser({ ...user!, role: newRole });
       if (newRole === "employee") navigate("/employee");
@@ -77,12 +77,14 @@ const LeaderDashboard = () => {
   <meta charset="UTF-8">
   <title>DiSC Rapport – ${member.full_name}</title>
   <style>
-    body { font-family: 'Segoe UI', sans-serif; max-width: 700px; margin: 40px auto; color: #1a2744; padding: 20px; }
-    h1 { color: #1a3a5c; border-bottom: 3px solid #1a3a5c; padding-bottom: 12px; }
-    h2 { color: #2d5a8e; margin-top: 30px; }
-    .badge { display: inline-block; background: #1a3a5c; color: white; padding: 4px 16px; border-radius: 20px; font-size: 14px; margin-right: 8px; margin-bottom: 8px; }
-    .style-circle { display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; border-radius: 50%; background: #1a3a5c; color: white; font-size: 36px; font-weight: bold; margin: 20px 0; }
+    body { font-family: 'Inter', 'Segoe UI', sans-serif; max-width: 700px; margin: 40px auto; color: #333; padding: 20px; }
+    h1 { color: #00aeef; border-bottom: 3px solid #00aeef; padding-bottom: 12px; }
+    h2 { color: #00aeef; margin-top: 30px; }
+    .badge { display: inline-block; background: #00aeef; color: white; padding: 4px 16px; border-radius: 20px; font-size: 14px; margin-right: 8px; margin-bottom: 8px; }
+    .style-circle { display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; border-radius: 50%; background: #00aeef; color: white; font-size: 36px; font-weight: bold; margin: 20px 0; }
     p { line-height: 1.7; }
+    .section { background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .section-title { font-weight: 600; color: #00aeef; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
     .footer { margin-top: 40px; font-size: 12px; color: #888; border-top: 1px solid #ddd; padding-top: 12px; }
   </style>
 </head>
@@ -92,10 +94,30 @@ const LeaderDashboard = () => {
   <p><strong>Dato:</strong> ${new Date().toLocaleDateString("da-DK")}</p>
   <div class="style-circle">${member.primary_style}</div>
   <h2>${desc.title}</h2>
-  <p>${desc.description}</p>
+
+  <div class="section">
+    <div class="section-title">Generel Profil</div>
+    <p>${desc.generalProfile}</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Styrker</div>
+    <p>${desc.strengths}</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Udviklingsområde</div>
+    <p>${desc.developmentArea}</p>
+  </div>
+
+  <div class="section">
+    <div class="section-title">I Teamet</div>
+    <p>${desc.teamRole}</p>
+  </div>
+
   <h2>Nøgleegenskaber</h2>
   <div>${desc.traits.map((t) => `<span class="badge">${t}</span>`).join("")}</div>
-  <div class="footer">Genereret af DiSC Profilerings-app</div>
+  <div class="footer">Genereret af DiSC Profilerings-app – Polygon Group</div>
 </body>
 </html>`;
 
@@ -115,7 +137,10 @@ const LeaderDashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-semibold" style={{ fontFamily: 'Playfair Display, serif' }}>DiSC Profilering – Leder</h1>
+        <div className="flex items-center gap-3">
+          <img src={polygonLogo} alt="Polygon" className="h-8 brightness-0 invert" />
+          <span className="text-xl font-semibold">DiSC Profilering – Leder</span>
+        </div>
         <div className="flex items-center gap-3">
           <span className="text-sm opacity-80">{user?.full_name}</span>
           <Button variant="ghost" onClick={handleLogout} className="text-primary-foreground hover:text-primary-foreground/80 hover:bg-primary/80">
@@ -125,10 +150,9 @@ const LeaderDashboard = () => {
       </header>
 
       <main className="max-w-5xl mx-auto p-6 space-y-8 mt-4">
-        {/* Response rate */}
-        <Card className="border-0 shadow-lg">
+        <Card className="border-0 shadow-lg rounded-xl">
           <CardHeader className="flex flex-row items-center gap-3 pb-2">
-            <Users className="h-5 w-5 text-accent" />
+            <Users className="h-5 w-5 text-primary" />
             <CardTitle className="text-lg">Svarprocent</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -140,8 +164,7 @@ const LeaderDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Team table */}
-        <Card className="border-0 shadow-lg">
+        <Card className="border-0 shadow-lg rounded-xl">
           <CardHeader>
             <CardTitle className="text-lg">Teamoversigt</CardTitle>
           </CardHeader>
@@ -177,13 +200,14 @@ const LeaderDashboard = () => {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="rounded-xl"
                         onClick={() => toggleRole(member)}
                       >
                         <ShieldCheck className="mr-1 h-3 w-3" />
                         {member.role === "leader" ? "Gør til medarbejder" : "Gør til leder"}
                       </Button>
                       {member.primary_style && (
-                        <Button variant="outline" size="sm" onClick={() => downloadReport(member)}>
+                        <Button variant="outline" size="sm" className="rounded-xl" onClick={() => downloadReport(member)}>
                           <Download className="mr-1 h-3 w-3" /> Rapport
                         </Button>
                       )}

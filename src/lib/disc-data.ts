@@ -51,30 +51,54 @@ export const discQuestions = [
   },
 ];
 
-export const discDescriptions: Record<string, { title: string; description: string; traits: string[] }> = {
+export const discDescriptions: Record<string, {
+  title: string;
+  description: string;
+  traits: string[];
+  generalProfile: string;
+  strengths: string;
+  developmentArea: string;
+  teamRole: string;
+}> = {
   D: {
     title: "Dominans (D)",
     description:
       "Du er resultatorienteret, beslutsom og elsker udfordringer. Du trives med at tage styringen og drive projekter fremad. Du er direkte i din kommunikation og fokuserer på bundlinjen.",
     traits: ["Beslutsom", "Resultatorienteret", "Direkte", "Konkurrenceminded", "Handlekraftig"],
+    generalProfile: "Du er direkte, resultatorienteret og beslutsom. Du kan lide at tage kontrol og trives med udfordringer og hurtige beslutninger.",
+    strengths: "Du er god til at skære igennem, skabe fremdrift og fokusere på bundlinjen.",
+    developmentArea: "Du kan øve dig i at være mere tålmodig over for detaljer og lytte mere til andres input, før du beslutter dig.",
+    teamRole: "Du er \"motoren\", der sikrer, at opgaverne bliver færdiggjort til tiden.",
   },
   I: {
     title: "Indflydelse (I)",
     description:
       "Du er entusiastisk, optimistisk og elsker at samarbejde med andre. Du motiverer teamet og skaber en positiv atmosfære. Du er god til at kommunikere og inspirere.",
     traits: ["Entusiastisk", "Optimistisk", "Samarbejdende", "Kreativ", "Inspirerende"],
+    generalProfile: "Du er udadvendt, entusiastisk og optimistisk. Du elsker at netværke og motivere andre gennem din energi og kreativitet.",
+    strengths: "Du er fantastisk til at skabe god stemning, tænke ud af boksen og få folk med på nye idéer.",
+    developmentArea: "Du kan med fordel arbejde på at være mere struktureret og følge opgaverne helt til dørs, selv de kedelige.",
+    teamRole: "Du er \"limen\", der skaber social sammenhængskraft og inspiration.",
   },
   S: {
     title: "Stabilitet (S)",
     description:
       "Du er tålmodig, pålidelig og værdsætter harmoni. Du er en stabil støtte for dit team og trives med forudsigelighed og klare rammer. Du lytter godt og er empatisk.",
     traits: ["Tålmodig", "Pålidelig", "Empatisk", "Stabil", "Loyal"],
+    generalProfile: "Du er rolig, hjælpsom og en fantastisk holdspiller. Du værdsætter tryghed, loyale relationer og en forudsigelig hverdag.",
+    strengths: "Du er god til at lytte, støtte dine kolleger og sikre, at alle trives i processen.",
+    developmentArea: "Du kan øve dig i at sige din mening mere direkte og blive bedre til at håndtere hurtige forandringer uden for meget varsel.",
+    teamRole: "Du er \"klippen\", som alle kan regne med, og som skaber harmoni.",
   },
   C: {
-    title: "Kompetence (C)",
+    title: "Samvittighedsfuldhed (C)",
     description:
       "Du er analytisk, præcis og kvalitetsbevidst. Du sætter høje standarder og er grundig i dit arbejde. Du foretrækker fakta og logik i din beslutningstagning.",
     traits: ["Analytisk", "Præcis", "Kvalitetsbevidst", "Systematisk", "Grundig"],
+    generalProfile: "Du er analytisk, detaljeorienteret og systematisk. Du går op i kvalitet og vil have, at tingene bliver gjort korrekt første gang.",
+    strengths: "Du er fagmanden, der har styr på fakta, data og processer. Du overser aldrig en vigtig detalje.",
+    developmentArea: "Du kan øve dig i at acceptere, at \"godt nok\" nogle gange er tilstrækkeligt, så du ikke bliver bremset af perfektionisme.",
+    teamRole: "Du er \"kvalitetssikringen\", der sørger for, at vi ikke laver fejl.",
   },
 };
 
