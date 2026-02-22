@@ -77,4 +77,17 @@ export const sv: typeof da = {
     becauseCommunication: "har den bästa profilen för att kommunicera och engagera gruppen.",
     becausePlanning: "har den bästa profilen för att strukturera och planera uppgifter.",
   },
+  approval: {
+    pendingTitle: "Väntar på godkännande",
+    pendingMessage: "Tack för din registrering, {name}. En ledare måste godkänna din åtkomst innan du kan ta DISC-testet. Du kommer att meddelas på denna sida när du är godkänd.",
+    checkStatus: "Kontrollera status",
+    pendingApprovals: "Väntande godkännanden",
+    approve: "Godkänn",
+    reject: "Avvisa",
+    approved: "Godkänd",
+    rejected: "Avvisad",
+    approvedMessage: "{name} har godkänts.",
+    rejectedMessage: "{name} har avvisats.",
+    noPending: "Inga väntande godkännanden.",
+  },
 };

@@ -4,6 +4,7 @@ interface User {
   id: string;
   full_name: string;
   role: "employee" | "leader";
+  status: "pending_approval" | "approved";
 }
 
 interface AuthContextType {

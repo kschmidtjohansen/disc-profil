@@ -197,4 +197,17 @@ export const es: typeof da = {
     becauseCommunication: "tiene el mejor perfil para comunicar y motivar al grupo.",
     becausePlanning: "tiene el mejor perfil para estructurar y planificar tareas.",
   },
+  approval: {
+    pendingTitle: "Esperando aprobación",
+    pendingMessage: "Gracias por registrarte, {name}. Un líder debe aprobar tu acceso antes de que puedas realizar la prueba DISC. Serás notificado en esta página cuando seas aprobado.",
+    checkStatus: "Verificar estado",
+    pendingApprovals: "Aprobaciones pendientes",
+    approve: "Aprobar",
+    reject: "Rechazar",
+    approved: "Aprobado",
+    rejected: "Rechazado",
+    approvedMessage: "{name} ha sido aprobado.",
+    rejectedMessage: "{name} ha sido rechazado.",
+    noPending: "No hay aprobaciones pendientes.",
+  },
 };

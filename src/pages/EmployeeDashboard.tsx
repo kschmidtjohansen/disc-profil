@@ -31,6 +31,7 @@ const EmployeeDashboard = () => {
 
   useEffect(() => {
     if (!user) { navigate("/"); return; }
+    if (user.status === "pending_approval") { navigate("/pending"); return; }
     supabase
       .from("disc_results")
       .select("primary_style, completed_at")

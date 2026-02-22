@@ -77,4 +77,17 @@ export const fi: typeof da = {
     becauseCommunication: "on paras profiili viestimään ja sitouttamaan ryhmää.",
     becausePlanning: "on paras profiili tehtävien rakenteistamiseen ja suunnitteluun.",
   },
+  approval: {
+    pendingTitle: "Odottaa hyväksyntää",
+    pendingMessage: "Kiitos rekisteröitymisestäsi, {name}. Johtajan on hyväksyttävä pääsysi ennen kuin voit tehdä DISC-testin. Saat ilmoituksen tällä sivulla, kun sinut on hyväksytty.",
+    checkStatus: "Tarkista tila",
+    pendingApprovals: "Odottavat hyväksynnät",
+    approve: "Hyväksy",
+    reject: "Hylkää",
+    approved: "Hyväksytty",
+    rejected: "Hylätty",
+    approvedMessage: "{name} on hyväksytty.",
+    rejectedMessage: "{name} on hylätty.",
+    noPending: "Ei odottavia hyväksyntöjä.",
+  },
 };

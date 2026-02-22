@@ -77,4 +77,17 @@ export const nl: typeof da = {
     becauseCommunication: "heeft het beste profiel om te communiceren en de groep te betrekken.",
     becausePlanning: "heeft het beste profiel om taken te structureren en te plannen.",
   },
+  approval: {
+    pendingTitle: "Wachten op goedkeuring",
+    pendingMessage: "Bedankt voor uw registratie, {name}. Een leider moet uw toegang goedkeuren voordat u de DISC-test kunt doen. U wordt op deze pagina op de hoogte gebracht wanneer u bent goedgekeurd.",
+    checkStatus: "Status controleren",
+    pendingApprovals: "Wachtende goedkeuringen",
+    approve: "Goedkeuren",
+    reject: "Afwijzen",
+    approved: "Goedgekeurd",
+    rejected: "Afgewezen",
+    approvedMessage: "{name} is goedgekeurd.",
+    rejectedMessage: "{name} is afgewezen.",
+    noPending: "Geen wachtende goedkeuringen.",
+  },
 };
