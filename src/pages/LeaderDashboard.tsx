@@ -17,7 +17,7 @@ import polygonLogo from "@/assets/polygon-logo.svg";
 import DiscReportTemplate from "@/components/DiscReportTemplate";
 import type { Json } from "@/integrations/supabase/types";
 
-const TOTAL_EMPLOYEES = 16;
+
 
 interface TeamMember {
   id: string;
@@ -115,8 +115,9 @@ const LeaderDashboard = () => {
     return scores;
   };
 
+  const totalMembers = team.length;
   const completedCount = team.filter((m) => m.primary_style).length;
-  const percentage = Math.round((completedCount / TOTAL_EMPLOYEES) * 100);
+  const percentage = totalMembers > 0 ? Math.round((completedCount / totalMembers) * 100) : 0;
 
   const toggleRole = async (member: TeamMember) => {
     const newRole = member.role === "leader" ? "employee" : "leader";
@@ -352,7 +353,7 @@ const LeaderDashboard = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>{t.leader.completedOf.replace("{completed}", String(completedCount)).replace("{total}", String(TOTAL_EMPLOYEES))}</span>
+              <span>{t.leader.completedOf.replace("{completed}", String(completedCount)).replace("{total}", String(totalMembers))}</span>
               <span className="font-semibold text-foreground">{percentage}%</span>
             </div>
             <Progress value={percentage} className="h-3" />
