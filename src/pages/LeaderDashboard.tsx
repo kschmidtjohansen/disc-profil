@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { differenceInMonths } from "date-fns";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -23,6 +24,7 @@ interface TeamMember {
   role: "employee" | "leader";
   primary_style: string | null;
   answers: string[] | null;
+  completed_at: string | null;
 }
 
 const LeaderDashboard = () => {
@@ -54,10 +56,10 @@ const LeaderDashboard = () => {
   const fetchTeam = async () => {
     const { data: profiles } = await supabase.from("profiles").select("id, full_name");
     const { data: roles } = await supabase.from("user_roles").select("user_id, role");
-    const { data: results } = await supabase.from("disc_results").select("user_id, primary_style, answers");
+    const { data: results } = await supabase.from("disc_results").select("user_id, primary_style, answers, completed_at");
 
     const rolesMap = new Map(roles?.map((r) => [r.user_id, r.role]));
-    const resultsMap = new Map(results?.map((r) => [r.user_id, { primary_style: r.primary_style, answers: r.answers }]));
+    const resultsMap = new Map(results?.map((r) => [r.user_id, { primary_style: r.primary_style, answers: r.answers, completed_at: r.completed_at }]));
 
     const members: TeamMember[] = (profiles ?? []).map((p) => {
       const result = resultsMap.get(p.id);
@@ -67,6 +69,7 @@ const LeaderDashboard = () => {
         role: rolesMap.get(p.id) ?? "employee",
         primary_style: result?.primary_style ?? null,
         answers: parseAnswers(result?.answers ?? null),
+        completed_at: result?.completed_at ?? null,
       };
     });
 
@@ -240,6 +243,7 @@ const LeaderDashboard = () => {
                   <TableHead>{t.leader.name}</TableHead>
                   <TableHead>{t.leader.role}</TableHead>
                   <TableHead>{t.leader.discProfile}</TableHead>
+                  <TableHead>{t.leader.status}</TableHead>
                   <TableHead className="text-right">{t.leader.actions}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -247,6 +251,7 @@ const LeaderDashboard = () => {
                 {team.map((member) => {
                   const style = member.primary_style?.split("/")[0];
                   const desc = style ? t.disc.descriptions[style as keyof typeof t.disc.descriptions] : null;
+                  const isStale = member.completed_at ? differenceInMonths(new Date(), new Date(member.completed_at)) >= 6 : false;
                   return (
                     <TableRow key={member.id}>
                       <TableCell className="font-medium">{member.full_name}</TableCell>
@@ -263,6 +268,19 @@ const LeaderDashboard = () => {
                         ) : (
                           <span className="text-muted-foreground text-sm">{t.leader.pending}</span>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        {member.primary_style ? (
+                          isStale ? (
+                            <Badge variant="outline" className="border-amber-400 bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
+                              {t.leader.statusStale}
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="border-green-400 bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400">
+                              {t.leader.statusCurrent}
+                            </Badge>
+                          )
+                        ) : null}
                       </TableCell>
                       <TableCell className="text-right space-x-2">
                         <Button variant="outline" size="sm" className="rounded-xl" onClick={() => toggleRole(member)}>
