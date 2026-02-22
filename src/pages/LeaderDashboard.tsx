@@ -11,7 +11,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Download, ShieldCheck, Users, Loader2, ChevronDown, Check, Globe, UserPlus, Trash2 } from "lucide-react";
+import { LogOut, Download, ShieldCheck, Users, Loader2, ChevronDown, ChevronRight, Check, Globe, UserPlus, Trash2 } from "lucide-react";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import polygonLogo from "@/assets/polygon-logo.svg";
 import DiscReportTemplate from "@/components/DiscReportTemplate";
@@ -46,6 +48,7 @@ const LeaderDashboard = () => {
   } | null>(null);
   const [preApproveNames, setPreApproveNames] = useState("");
   const [preApproveLoading, setPreApproveLoading] = useState(false);
+  const [preApproveOpen, setPreApproveOpen] = useState(false);
 
   useEffect(() => {
     if (!user) { navigate("/"); return; }
@@ -319,32 +322,39 @@ const LeaderDashboard = () => {
           </Card>
         )}
 
-        <Card className="border-0 shadow-lg rounded-xl border-l-4 border-l-blue-400">
-          <CardHeader className="flex flex-row items-center gap-3 pb-2">
-            <UserPlus className="h-5 w-5 text-blue-500" />
-            <CardTitle className="text-lg">{t.leader.preApprove}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground">{t.leader.preApproveDesc}</p>
-            <Textarea
-              value={preApproveNames}
-              onChange={(e) => setPreApproveNames(e.target.value)}
-              placeholder="Anders Jensen&#10;Maria Nielsen&#10;..."
-              rows={4}
-            />
-            <Button
-              onClick={handlePreApprove}
-              disabled={preApproveLoading || !preApproveNames.trim()}
-              className="rounded-xl"
-            >
-              {preApproveLoading ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t.leader.preApproveAdd}</>
-              ) : (
-                <><UserPlus className="mr-2 h-4 w-4" /> {t.leader.preApproveAdd}</>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
+        <Collapsible open={preApproveOpen} onOpenChange={setPreApproveOpen}>
+          <Card className="border-0 shadow-lg rounded-xl border-l-4 border-l-blue-400">
+            <CollapsibleTrigger asChild>
+              <CardHeader className="flex flex-row items-center gap-3 pb-2 cursor-pointer hover:bg-muted/50 transition-colors rounded-t-xl">
+                <UserPlus className="h-5 w-5 text-blue-500" />
+                <CardTitle className="text-lg">{t.leader.preApprove}</CardTitle>
+                <ChevronRight className={`ml-auto h-4 w-4 transition-transform ${preApproveOpen ? "rotate-90" : ""}`} />
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground">{t.leader.preApproveDesc}</p>
+                <Textarea
+                  value={preApproveNames}
+                  onChange={(e) => setPreApproveNames(e.target.value)}
+                  placeholder="Anders Jensen&#10;Maria Nielsen&#10;..."
+                  rows={4}
+                />
+                <Button
+                  onClick={handlePreApprove}
+                  disabled={preApproveLoading || !preApproveNames.trim()}
+                  className="rounded-xl"
+                >
+                  {preApproveLoading ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t.leader.preApproveAdd}</>
+                  ) : (
+                    <><UserPlus className="mr-2 h-4 w-4" /> {t.leader.preApproveAdd}</>
+                  )}
+                </Button>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
 
         <Card className="border-0 shadow-lg rounded-xl">
           <CardHeader className="flex flex-row items-center gap-3 pb-2">
@@ -389,11 +399,20 @@ const LeaderDashboard = () => {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {member.primary_style ? (
-                          <Badge variant="outline" className="font-semibold">
-                            {desc?.title ?? member.primary_style}
-                          </Badge>
-                        ) : (
+                        {member.primary_style ? (() => {
+                          const styleColors: Record<string, string> = {
+                            D: "border-red-400 bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400",
+                            I: "border-yellow-400 bg-yellow-50 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400",
+                            S: "border-green-400 bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400",
+                            C: "border-blue-400 bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400",
+                          };
+                          const colorClass = styleColors[style ?? ""] ?? "";
+                          return (
+                            <Badge variant="outline" className={`font-semibold ${colorClass}`}>
+                              {desc?.title ?? member.primary_style}
+                            </Badge>
+                          );
+                        })() : (
                           <span className="text-muted-foreground text-sm">{t.leader.pending}</span>
                         )}
                       </TableCell>
@@ -414,33 +433,50 @@ const LeaderDashboard = () => {
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <Button variant="outline" size="sm" className="rounded-xl" onClick={() => toggleRole(member)}>
-                          <ShieldCheck className="mr-1 h-3 w-3" />
-                          <span className="hidden sm:inline">{member.role === "leader" ? t.leader.makeEmployee : t.leader.makeLeader}</span>
-                        </Button>
-                        {member.primary_style && member.answers && (
-                          <Button
-                            variant="outline" size="sm" className="rounded-xl"
-                            onClick={() => downloadReport(member)}
-                            disabled={generatingId === member.id}
-                          >
-                            {generatingId === member.id ? (
-                              <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> <span className="hidden sm:inline">{t.leader.generating}</span></>
-                            ) : (
-                              <><Download className="mr-1 h-3 w-3" /> <span className="hidden sm:inline">{t.leader.fullReport}</span></>
+                      <TableCell className="text-right">
+                        <TooltipProvider>
+                          <div className="flex justify-end gap-1">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="outline" size="icon" className="rounded-xl h-8 w-8" onClick={() => toggleRole(member)}>
+                                  <ShieldCheck className="h-4 w-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>{member.role === "leader" ? t.leader.makeEmployee : t.leader.makeLeader}</TooltipContent>
+                            </Tooltip>
+                            {member.primary_style && member.answers && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline" size="icon" className="rounded-xl h-8 w-8"
+                                    onClick={() => downloadReport(member)}
+                                    disabled={generatingId === member.id}
+                                  >
+                                    {generatingId === member.id ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <Download className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>{generatingId === member.id ? t.leader.generating : t.leader.fullReport}</TooltipContent>
+                              </Tooltip>
                             )}
-                          </Button>
-                        )}
-                        {!member.primary_style && (
-                          <Button
-                            variant="outline" size="sm" className="rounded-xl text-destructive hover:text-destructive"
-                            onClick={() => handleDeleteMember(member)}
-                          >
-                            <Trash2 className="mr-1 h-3 w-3" />
-                            <span className="hidden sm:inline">{t.common.deleteLabel}</span>
-                          </Button>
-                        )}
+                            {!member.primary_style && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline" size="icon" className="rounded-xl h-8 w-8 text-destructive hover:text-destructive"
+                                    onClick={() => handleDeleteMember(member)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>{t.common.deleteLabel}</TooltipContent>
+                              </Tooltip>
+                            )}
+                          </div>
+                        </TooltipProvider>
                       </TableCell>
                     </TableRow>
                   );
