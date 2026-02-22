@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -9,8 +9,10 @@ import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Download, ShieldCheck, Users } from "lucide-react";
+import { LogOut, Download, ShieldCheck, Users, Loader2 } from "lucide-react";
 import polygonLogo from "@/assets/polygon-logo.svg";
+import DiscReportTemplate from "@/components/DiscReportTemplate";
+import type { Json } from "@/integrations/supabase/types";
 
 const TOTAL_EMPLOYEES = 16;
 
@@ -19,6 +21,7 @@ interface TeamMember {
   full_name: string;
   role: "employee" | "leader";
   primary_style: string | null;
+  answers: string[] | null;
 }
 
 const LeaderDashboard = () => {
@@ -27,6 +30,13 @@ const LeaderDashboard = () => {
   const { toast } = useToast();
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const reportRef = useRef<HTMLDivElement>(null);
+  const [reportData, setReportData] = useState<{
+    fullName: string;
+    primaryStyle: string;
+    scores: { D: number; I: number; S: number; C: number };
+  } | null>(null);
 
   useEffect(() => {
     if (!user) { navigate("/"); return; }
@@ -37,20 +47,37 @@ const LeaderDashboard = () => {
   const fetchTeam = async () => {
     const { data: profiles } = await supabase.from("profiles").select("id, full_name");
     const { data: roles } = await supabase.from("user_roles").select("user_id, role");
-    const { data: results } = await supabase.from("disc_results").select("user_id, primary_style");
+    const { data: results } = await supabase.from("disc_results").select("user_id, primary_style, answers");
 
     const rolesMap = new Map(roles?.map((r) => [r.user_id, r.role]));
-    const resultsMap = new Map(results?.map((r) => [r.user_id, r.primary_style]));
+    const resultsMap = new Map(results?.map((r) => [r.user_id, { primary_style: r.primary_style, answers: r.answers }]));
 
-    const members: TeamMember[] = (profiles ?? []).map((p) => ({
-      id: p.id,
-      full_name: p.full_name,
-      role: rolesMap.get(p.id) ?? "employee",
-      primary_style: resultsMap.get(p.id) ?? null,
-    }));
+    const members: TeamMember[] = (profiles ?? []).map((p) => {
+      const result = resultsMap.get(p.id);
+      return {
+        id: p.id,
+        full_name: p.full_name,
+        role: rolesMap.get(p.id) ?? "employee",
+        primary_style: result?.primary_style ?? null,
+        answers: parseAnswers(result?.answers ?? null),
+      };
+    });
 
     setTeam(members);
     setLoading(false);
+  };
+
+  const parseAnswers = (answers: Json | null): string[] | null => {
+    if (!answers || !Array.isArray(answers)) return null;
+    return answers.filter((a): a is string => typeof a === "string");
+  };
+
+  const calculateScores = (answers: string[]): { D: number; I: number; S: number; C: number } => {
+    const scores = { D: 0, I: 0, S: 0, C: 0 };
+    answers.forEach((a) => {
+      if (a in scores) scores[a as keyof typeof scores]++;
+    });
+    return scores;
   };
 
   const completedCount = team.filter((m) => m.primary_style).length;
@@ -67,67 +94,49 @@ const LeaderDashboard = () => {
     fetchTeam();
   };
 
-  const downloadReport = (member: TeamMember) => {
-    if (!member.primary_style) return;
-    const desc = discDescriptions[member.primary_style];
-    const content = `
-<!DOCTYPE html>
-<html lang="da">
-<head>
-  <meta charset="UTF-8">
-  <title>DiSC Rapport – ${member.full_name}</title>
-  <style>
-    body { font-family: 'Inter', 'Segoe UI', sans-serif; max-width: 700px; margin: 40px auto; color: #333; padding: 20px; }
-    h1 { color: #00aeef; border-bottom: 3px solid #00aeef; padding-bottom: 12px; }
-    h2 { color: #00aeef; margin-top: 30px; }
-    .badge { display: inline-block; background: #00aeef; color: white; padding: 4px 16px; border-radius: 20px; font-size: 14px; margin-right: 8px; margin-bottom: 8px; }
-    .style-circle { display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; border-radius: 50%; background: #00aeef; color: white; font-size: 36px; font-weight: bold; margin: 20px 0; }
-    p { line-height: 1.7; }
-    .section { background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-    .section-title { font-weight: 600; color: #00aeef; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .footer { margin-top: 40px; font-size: 12px; color: #888; border-top: 1px solid #ddd; padding-top: 12px; }
-  </style>
-</head>
-<body>
-  <h1>DiSC Profilrapport</h1>
-  <p><strong>Navn:</strong> ${member.full_name}</p>
-  <p><strong>Dato:</strong> ${new Date().toLocaleDateString("da-DK")}</p>
-  <div class="style-circle">${member.primary_style}</div>
-  <h2>${desc.title}</h2>
+  const downloadReport = async (member: TeamMember) => {
+    if (!member.primary_style || !member.answers) return;
+    setGeneratingId(member.id);
 
-  <div class="section">
-    <div class="section-title">Generel Profil</div>
-    <p>${desc.generalProfile}</p>
-  </div>
+    const scores = calculateScores(member.answers);
+    setReportData({ fullName: member.full_name, primaryStyle: member.primary_style, scores });
 
-  <div class="section">
-    <div class="section-title">Styrker</div>
-    <p>${desc.strengths}</p>
-  </div>
+    // Wait for render
+    await new Promise((r) => setTimeout(r, 500));
 
-  <div class="section">
-    <div class="section-title">Udviklingsområde</div>
-    <p>${desc.developmentArea}</p>
-  </div>
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
 
-  <div class="section">
-    <div class="section-title">I Teamet</div>
-    <p>${desc.teamRole}</p>
-  </div>
+      const el = reportRef.current;
+      if (!el) throw new Error("Report element not found");
 
-  <h2>Nøgleegenskaber</h2>
-  <div>${desc.traits.map((t) => `<span class="badge">${t}</span>`).join("")}</div>
-  <div class="footer">Genereret af DiSC Profilerings-app – Polygon Group</div>
-</body>
-</html>`;
+      const pages = el.children;
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pdfWidth = 210;
+      const pdfHeight = 297;
 
-    const blob = new Blob([content], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `DiSC-rapport-${member.full_name.replace(/\s+/g, "-")}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
+      for (let i = 0; i < pages.length; i++) {
+        const canvas = await html2canvas(pages[i] as HTMLElement, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          width: 794,
+          height: 1123,
+        });
+        const imgData = canvas.toDataURL("image/png");
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      }
+
+      pdf.save(`DiSC-rapport-${member.full_name.replace(/\s+/g, "-")}.pdf`);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      toast({ title: "Fejl", description: "Kunne ikke generere PDF-rapport.", variant: "destructive" });
+    } finally {
+      setGeneratingId(null);
+      setReportData(null);
+    }
   };
 
   const handleLogout = () => { logout(); navigate("/"); };
@@ -197,18 +206,23 @@ const LeaderDashboard = () => {
                       )}
                     </TableCell>
                     <TableCell className="text-right space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="rounded-xl"
-                        onClick={() => toggleRole(member)}
-                      >
+                      <Button variant="outline" size="sm" className="rounded-xl" onClick={() => toggleRole(member)}>
                         <ShieldCheck className="mr-1 h-3 w-3" />
                         {member.role === "leader" ? "Gør til medarbejder" : "Gør til leder"}
                       </Button>
-                      {member.primary_style && (
-                        <Button variant="outline" size="sm" className="rounded-xl" onClick={() => downloadReport(member)}>
-                          <Download className="mr-1 h-3 w-3" /> Rapport
+                      {member.primary_style && member.answers && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl"
+                          onClick={() => downloadReport(member)}
+                          disabled={generatingId === member.id}
+                        >
+                          {generatingId === member.id ? (
+                            <><Loader2 className="mr-1 h-3 w-3 animate-spin" /> Genererer...</>
+                          ) : (
+                            <><Download className="mr-1 h-3 w-3" /> Fuld Rapport</>
+                          )}
                         </Button>
                       )}
                     </TableCell>
@@ -219,6 +233,13 @@ const LeaderDashboard = () => {
           </CardContent>
         </Card>
       </main>
+
+      {/* Hidden report template for PDF generation */}
+      {reportData && (
+        <div style={{ position: "fixed", left: "-9999px", top: 0 }}>
+          <DiscReportTemplate ref={reportRef} {...reportData} />
+        </div>
+      )}
     </div>
   );
 };
