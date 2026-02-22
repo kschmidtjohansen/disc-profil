@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { discQuestions, discDescriptions, calculatePrimaryStyle } from "@/lib/disc-data";
@@ -8,12 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, CheckCircle2, ArrowRight, ArrowLeft } from "lucide-react";
+import { LogOut, CheckCircle2, ArrowRight, ArrowLeft, ChevronDown, Check } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import polygonLogo from "@/assets/polygon-logo.svg";
 
 const EmployeeDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [discResult, setDiscResult] = useState<string | null>(null);
   const [testStarted, setTestStarted] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -22,7 +24,6 @@ const EmployeeDashboard = () => {
 
   useEffect(() => {
     if (!user) { navigate("/"); return; }
-    if (user.role === "leader") { navigate("/leader"); return; }
 
     supabase
       .from("disc_results")
@@ -55,6 +56,27 @@ const EmployeeDashboard = () => {
 
   const handleLogout = () => { logout(); navigate("/"); };
 
+  const NavDropdown = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex items-center gap-1 text-xl font-semibold text-primary-foreground hover:opacity-80 transition-opacity">
+          DISC Profil
+          <ChevronDown className="h-4 w-4" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="bg-popover">
+        <DropdownMenuItem onClick={() => navigate("/employee")} className="cursor-pointer">
+          {location.pathname === "/employee" && <Check className="mr-2 h-4 w-4" />}
+          <span className={location.pathname !== "/employee" ? "ml-6" : ""}>Medarbejder</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/leader")} className="cursor-pointer">
+          {location.pathname === "/leader" && <Check className="mr-2 h-4 w-4" />}
+          <span className={location.pathname !== "/leader" ? "ml-6" : ""}>Leder</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   if (loading) return <div className="flex min-h-screen items-center justify-center"><p>Indlæser...</p></div>;
 
   // Test view
@@ -65,7 +87,7 @@ const EmployeeDashboard = () => {
         <header className="bg-primary text-primary-foreground px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <img src={polygonLogo} alt="Polygon" className="h-8 brightness-0 invert" />
-            <span className="text-xl font-semibold">DiSC Profilering</span>
+            <NavDropdown />
           </div>
           <span className="text-sm opacity-80">Spørgsmål {currentQuestion + 1} af {discQuestions.length}</span>
         </header>
@@ -126,7 +148,7 @@ const EmployeeDashboard = () => {
         <header className="bg-primary text-primary-foreground px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <img src={polygonLogo} alt="Polygon" className="h-8 brightness-0 invert" />
-            <span className="text-xl font-semibold">DiSC Profilering</span>
+            <NavDropdown />
           </div>
           <Button variant="ghost" onClick={handleLogout} className="text-primary-foreground hover:text-primary-foreground/80 hover:bg-primary/80">
             <LogOut className="mr-2 h-4 w-4" /> Log ud
@@ -166,7 +188,7 @@ const EmployeeDashboard = () => {
       <header className="bg-primary text-primary-foreground px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <img src={polygonLogo} alt="Polygon" className="h-8 brightness-0 invert" />
-          <span className="text-xl font-semibold">DiSC Profilering</span>
+          <NavDropdown />
         </div>
         <Button variant="ghost" onClick={handleLogout} className="text-primary-foreground hover:text-primary-foreground/80 hover:bg-primary/80">
           <LogOut className="mr-2 h-4 w-4" /> Log ud
