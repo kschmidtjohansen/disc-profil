@@ -31,6 +31,22 @@ const Login = () => {
 
       if (existing) {
         profileId = existing.id;
+
+        // Check if role is missing and create one if needed
+        const { data: existingRole } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", profileId)
+          .maybeSingle();
+
+        if (!existingRole) {
+          const { data: countData } = await supabase.rpc("get_user_count");
+          const isFirst = (countData ?? 0) === 1;
+          await supabase.from("user_roles").insert({
+            user_id: profileId,
+            role: isFirst ? "leader" : "employee",
+          });
+        }
       } else {
         const { data: countData } = await supabase.rpc("get_user_count");
         const isFirst = (countData ?? 0) === 0;
@@ -54,7 +70,7 @@ const Login = () => {
         .from("user_roles")
         .select("role")
         .eq("user_id", profileId)
-        .single();
+        .maybeSingle();
 
       const role = roleData?.role ?? "employee";
 
