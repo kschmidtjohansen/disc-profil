@@ -278,4 +278,10 @@ export const da = {
       },
     },
   },
+  teamOverview: {
+    title: "Team Overblik",
+    subtitle: "DISC-fordeling i dit team",
+    noResults: "Ingen medarbejdere har gennemført testen endnu.",
+    topTraits: "Top egenskaber",
+  },
 };

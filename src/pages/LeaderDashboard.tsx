@@ -166,6 +166,10 @@ const LeaderDashboard = () => {
           {location.pathname === "/dashboard" && <Check className="mr-2 h-4 w-4" />}
           <span className={location.pathname !== "/dashboard" ? "ml-6" : ""}>{t.common.leader}</span>
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/team-overview")} className="cursor-pointer">
+          {location.pathname === "/team-overview" && <Check className="mr-2 h-4 w-4" />}
+          <span className={location.pathname !== "/team-overview" ? "ml-6" : ""}>{t.teamOverview.title}</span>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

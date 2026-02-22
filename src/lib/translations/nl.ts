@@ -46,4 +46,10 @@ export const nl: typeof da = {
       C: { motivation: "Kwaliteit, precisie en logische argumentatie.", underPressure: "Onder druk wordt u extra kritisch en neigt u tot overanalyse.", communication: "Wees gedetailleerd, gebruik data en vermijd te persoonlijk/emotioneel te zijn.", leaderTips: ["Geef ze tijd voor verdieping en respecteer hun behoefte aan orde."] },
     },
   },
+  teamOverview: {
+    title: "Teamoverzicht",
+    subtitle: "DISC-verdeling in je team",
+    noResults: "Nog geen medewerkers hebben de test afgerond.",
+    topTraits: "Belangrijkste eigenschappen",
+  },
 };

@@ -166,4 +166,10 @@ export const fr: typeof da = {
       C: { motivation: "Qualité, précision et argumentation logique.", underPressure: "Sous pression, vous devenez extra critique et tendez à suranalyser.", communication: "Soyez détaillé, utilisez des données et évitez d'être trop personnel/émotionnel.", leaderTips: ["Donnez-leur du temps pour approfondir et respectez leur besoin d'ordre."] },
     },
   },
+  teamOverview: {
+    title: "Vue d'ensemble de l'équipe",
+    subtitle: "Répartition DISC dans votre équipe",
+    noResults: "Aucun employé n'a encore terminé le test.",
+    topTraits: "Principaux traits",
+  },
 };

@@ -168,4 +168,10 @@ export const de: typeof da = {
       C: { motivation: "Qualität, Präzision und logische Argumentation.", underPressure: "Unter Druck werden Sie besonders kritisch und neigen zur Überanalyse.", communication: "Seien Sie detailliert, nutzen Sie Daten und vermeiden Sie zu persönlich/emotional zu sein.", leaderTips: ["Geben Sie ihnen Zeit für Vertiefung und respektieren Sie ihr Bedürfnis nach Ordnung."] },
     },
   },
+  teamOverview: {
+    title: "Teamübersicht",
+    subtitle: "DISC-Verteilung in deinem Team",
+    noResults: "Noch hat kein Mitarbeiter den Test abgeschlossen.",
+    topTraits: "Top-Eigenschaften",
+  },
 };
