@@ -256,4 +256,10 @@ export const en: typeof da = {
       C: { motivation: "Quality, precision and logical argumentation.", underPressure: "Under pressure you become extra critical of details and may over-analyze things. You risk becoming paralyzed by perfectionism and may seem dismissive of quick, unfounded decisions.", communication: "Be detailed, use data, and avoid being too personal/emotional.", leaderTips: ["Give them time for deep work, and respect their need for order."] },
     },
   },
+  teamOverview: {
+    title: "Team Overview",
+    subtitle: "DISC distribution in your team",
+    noResults: "No employees have completed the test yet.",
+    topTraits: "Top traits",
+  },
 };

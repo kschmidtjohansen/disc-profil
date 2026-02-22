@@ -8,6 +8,7 @@ import { I18nProvider } from "@/lib/i18n";
 import Login from "./pages/Login";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import LeaderDashboard from "./pages/LeaderDashboard";
+import TeamOverview from "./pages/TeamOverview";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
               <Route path="/" element={<Login />} />
               <Route path="/disc-test" element={<EmployeeDashboard />} />
               <Route path="/dashboard" element={<LeaderDashboard />} />
+              <Route path="/team-overview" element={<TeamOverview />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

@@ -46,4 +46,10 @@ export const fi: typeof da = {
       C: { motivation: "Laatu, tarkkuus ja looginen argumentointi.", underPressure: "Paineen alla muutut erityisen kriittiseksi ja ylianalsoit helposti.", communication: "Ole yksityiskohtainen, käytä dataa ja vältä liian henkilökohtaista viestintää.", leaderTips: ["Anna heille aikaa syventyä ja kunnioita heidän tarvettaan järjestykseen."] },
     },
   },
+  teamOverview: {
+    title: "Tiimin yleiskatsaus",
+    subtitle: "DISC-jakauma tiimissäsi",
+    noResults: "Yksikään työntekijä ei ole vielä suorittanut testiä.",
+    topTraits: "Tärkeimmät ominaisuudet",
+  },
 };

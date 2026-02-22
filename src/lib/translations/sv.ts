@@ -46,4 +46,10 @@ export const sv: typeof da = {
       C: { motivation: "Kvalitet, precision och logisk argumentation.", underPressure: "Under press blir du extra kritisk och tenderar att överanalysera.", communication: "Var detaljerad, använd data och undvik att vara för personlig/känslomässig.", leaderTips: ["Ge dem tid för fördjupning och respektera deras behov av ordning."] },
     },
   },
+  teamOverview: {
+    title: "Teamöversikt",
+    subtitle: "DISC-fördelning i ditt team",
+    noResults: "Inga medarbetare har slutfört testet ännu.",
+    topTraits: "Främsta egenskaper",
+  },
 };
