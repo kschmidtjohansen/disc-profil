@@ -47,13 +47,13 @@ export const sv: typeof da = {
     },
   },
   teamOverview: {
-    title: "Teamöversikt",
+    title: "Översikt",
     subtitle: "DISC-fördelning i ditt team",
     noResults: "Inga medarbetare har slutfört testet ännu.",
     topTraits: "Främsta egenskaper",
   },
   teamAnalyzer: {
-    title: "Teamanalysator",
+    title: "Analysator",
     subtitle: "Analysera DISC-balansen i en utvald grupp",
     selectEmployees: "Välj medarbetare (2-5)",
     selected: "{count} av 5 valda",

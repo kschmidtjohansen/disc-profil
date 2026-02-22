@@ -167,13 +167,13 @@ export const fr: typeof da = {
     },
   },
   teamOverview: {
-    title: "Vue d'ensemble de l'équipe",
+    title: "Vue d'ensemble",
     subtitle: "Répartition DISC dans votre équipe",
     noResults: "Aucun employé n'a encore terminé le test.",
     topTraits: "Principaux traits",
   },
   teamAnalyzer: {
-    title: "Analyseur d'équipe",
+    title: "Analyseur",
     subtitle: "Analysez l'équilibre DISC dans un groupe sélectionné",
     selectEmployees: "Sélectionner des employés (2-5)",
     selected: "{count} sur 5 sélectionnés",

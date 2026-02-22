@@ -297,13 +297,13 @@ export const da = {
     },
   },
   teamOverview: {
-    title: "Team Overblik",
+    title: "Overblik",
     subtitle: "DISC-fordeling i dit team",
     noResults: "Ingen medarbejdere har gennemført testen endnu.",
     topTraits: "Top egenskaber",
   },
   teamAnalyzer: {
-    title: "Team Analysator",
+    title: "Analysator",
     subtitle: "Analysér DISC-balancen i en udvalgt gruppe",
     selectEmployees: "Vælg medarbejdere (2-5)",
     selected: "{count} af 5 valgt",

@@ -275,13 +275,13 @@ export const en: typeof da = {
     },
   },
   teamOverview: {
-    title: "Team Overview",
+    title: "Overview",
     subtitle: "DISC distribution in your team",
     noResults: "No employees have completed the test yet.",
     topTraits: "Top traits",
   },
   teamAnalyzer: {
-    title: "Team Analyzer",
+    title: "Analyzer",
     subtitle: "Analyze the DISC balance in a selected group",
     selectEmployees: "Select employees (2-5)",
     selected: "{count} of 5 selected",

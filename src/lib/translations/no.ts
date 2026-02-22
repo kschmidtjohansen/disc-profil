@@ -47,13 +47,13 @@ export const no: typeof da = {
     },
   },
   teamOverview: {
-    title: "Teamoversikt",
+    title: "Oversikt",
     subtitle: "DISC-fordeling i teamet ditt",
     noResults: "Ingen ansatte har fullført testen ennå.",
     topTraits: "Viktigste egenskaper",
   },
   teamAnalyzer: {
-    title: "Teamanalysator",
+    title: "Analysator",
     subtitle: "Analyser DISC-balansen i en utvalgt gruppe",
     selectEmployees: "Velg medarbeidere (2-5)",
     selected: "{count} av 5 valgt",

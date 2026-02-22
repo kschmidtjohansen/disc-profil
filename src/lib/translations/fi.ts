@@ -47,13 +47,13 @@ export const fi: typeof da = {
     },
   },
   teamOverview: {
-    title: "Tiimin yleiskatsaus",
+    title: "Yleiskatsaus",
     subtitle: "DISC-jakauma tiimissäsi",
     noResults: "Yksikään työntekijä ei ole vielä suorittanut testiä.",
     topTraits: "Tärkeimmät ominaisuudet",
   },
   teamAnalyzer: {
-    title: "Tiimianalysaattori",
+    title: "Analysaattori",
     subtitle: "Analysoi DISC-tasapaino valitussa ryhmässä",
     selectEmployees: "Valitse työntekijät (2-5)",
     selected: "{count}/5 valittu",
